@@ -71,6 +71,7 @@ const getMaintenanceStatus = (r: MaintenanceRecord) => {
 export default function Maintenance() {
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
+  const [overdueOnly, setOverdueOnly] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   const {
@@ -85,7 +86,7 @@ export default function Maintenance() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, typeFilter]);
+  }, [searchQuery, typeFilter, overdueOnly]);
 
   // Distinct service types for filter chips.
   const serviceTypes = Array.from(
@@ -104,7 +105,8 @@ export default function Maintenance() {
       (r.vehicle_plate ?? "").toLowerCase().includes(q) ||
       vehicleName.includes(q);
     const matchesType = !typeFilter || r.service_type === typeFilter;
-    return matchesSearch && matchesType;
+    const matchesOverdue = !overdueOnly || getMaintenanceStatus(r) === "OVERDUE";
+    return matchesSearch && matchesType && matchesOverdue;
   });
 
   const totalCost = filtered.reduce((sum, r) => sum + num(r.cost), 0);
@@ -135,6 +137,24 @@ export default function Maintenance() {
             onClick={() => setTypeFilter(typeFilter === type ? null : type)}
           />
         ))}
+        <label className="ml-auto flex items-center gap-2 cursor-pointer select-none text-sm">
+          <span className="text-muted-foreground">Overdue only</span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={overdueOnly}
+            onClick={() => setOverdueOnly((v) => !v)}
+            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+              overdueOnly ? "bg-destructive" : "bg-muted"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                overdueOnly ? "translate-x-4" : "translate-x-0.5"
+              }`}
+            />
+          </button>
+        </label>
       </div>
 
       {/* Stats & Search */}
