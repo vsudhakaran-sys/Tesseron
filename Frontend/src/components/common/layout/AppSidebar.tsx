@@ -13,6 +13,7 @@ import {
   Users,
   Car,
   User,
+  Wrench,
 } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -54,6 +55,11 @@ export function AppSidebar({ isCollapsed, setIsCollapsed }: AppSidebarProps) {
       label: t.nav.drivers || "Drivers",
       href: "/drivers",
       icon: <User className="h-4 w-4" />,
+    },
+    {
+      label: t.nav.maintenance || "Maintenance",
+      href: "/maintenance",
+      icon: <Wrench className="h-4 w-4" />,
     },
   ];
 

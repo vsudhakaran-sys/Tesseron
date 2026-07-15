@@ -9,7 +9,9 @@ import Vehicles from "./pages/Vehicles";
 import VehicleDetail from "./pages/VehicleDetail";
 import Drivers from "./pages/Drivers";
 import DriverNew from "./pages/DriverNew";
+import DriverDetail from "./pages/DriverDetail";
 import DriverEdit from "./pages/DriverEdit";
+import Maintenance from "./pages/Maintenance";
 import Vendors from "./pages/Vendors";
 import DriverPortal from "./pages/DriverPortal";
 import NotFound from "./pages/NotFound";
@@ -43,7 +45,9 @@ const App = () => (
               <Route path="/vehicles/:id" element={<VehicleDetail />} />
               <Route path="/drivers" element={<Drivers />} />
               <Route path="/drivers/new" element={<DriverNew />} />
+              <Route path="/drivers/:id" element={<DriverDetail />} />
               <Route path="/drivers/:id/edit" element={<DriverEdit />} />
+              <Route path="/maintenance" element={<Maintenance />} />
               <Route path="/vendors" element={<Vendors />} />
               {/* Placeholder routes */}
 

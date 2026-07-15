@@ -16,6 +16,10 @@ const {
     saveUploadHistory,
     updateUploadHistory,
     getHistory,
+    getDrivers,
+    getDriverById,
+    getTripsByDriver,
+    getMaintenance,
     getRecordsByUpload,
     exportUploadAsExcel,
 } = require('../services/dataService');
@@ -511,6 +515,53 @@ router.get('/history', async (_req, res) => {
     try {
         const history = await getHistory();
         res.json(history);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ─── GET /drivers ─────────────────────────────────────────────────────────────
+
+router.get('/drivers', async (_req, res) => {
+    try {
+        const drivers = await getDrivers();
+        res.json(drivers);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ─── GET /drivers/:driverId ───────────────────────────────────────────────────
+
+router.get('/drivers/:driverId', async (req, res) => {
+    try {
+        const driver = await getDriverById(req.params.driverId);
+        if (!driver) {
+            return res.status(404).json({ error: 'Driver not found' });
+        }
+        res.json(driver);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ─── GET /drivers/:driverId/trips ─────────────────────────────────────────────
+
+router.get('/drivers/:driverId/trips', async (req, res) => {
+    try {
+        const trips = await getTripsByDriver(req.params.driverId);
+        res.json(trips);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ─── GET /maintenance ─────────────────────────────────────────────────────────
+
+router.get('/maintenance', async (_req, res) => {
+    try {
+        const records = await getMaintenance();
+        res.json(records);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
