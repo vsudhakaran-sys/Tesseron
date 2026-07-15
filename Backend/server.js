@@ -5,6 +5,7 @@ const path = require('path');
 const fleetSyncRoutes = require('./routes/fleetSync');
 const authRoutes = require('./routes/auth');
 const vehicleRoutes = require('./routes/vehicles');
+const driverRoutes = require('./routes/drivers');
 
 const app = express();
 const PORT = process.env.PORT;
@@ -16,6 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/fleetsync', fleetSyncRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/vehicles', vehicleRoutes);
+app.use('/api/drivers', driverRoutes);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 

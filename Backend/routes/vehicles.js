@@ -7,6 +7,8 @@ const {
     updateVehicle,
     deleteVehicle,
 } = require('../services/vehicleService');
+const { getTripsByVehicle } = require('../services/tripService');
+const { assignDriver, unassignDriver } = require('../services/driverService');
 
 // GET /api/vehicles — list all
 router.get('/', async (_req, res) => {
@@ -26,6 +28,39 @@ router.get('/:id', async (req, res) => {
         res.json(vehicle);
     } catch (err) {
         res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/vehicles/:id/trips — trip history for a vehicle
+router.get('/:id/trips', async (req, res) => {
+    try {
+        const limit = Math.min(parseInt(req.query.limit) || 50, 500);
+        const trips = await getTripsByVehicle(req.params.id, limit);
+        res.json(trips);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// POST /api/vehicles/:id/assign — assign a driver (F2 rules enforced in service)
+router.post('/:id/assign', async (req, res) => {
+    try {
+        const { driver_id } = req.body;
+        if (!driver_id) return res.status(400).json({ error: 'driver_id is required' });
+        const vehicle = await assignDriver(req.params.id, driver_id);
+        res.json(vehicle);
+    } catch (err) {
+        res.status(err.status || 400).json({ error: err.message });
+    }
+});
+
+// POST /api/vehicles/:id/unassign — clear the current driver assignment
+router.post('/:id/unassign', async (req, res) => {
+    try {
+        const vehicle = await unassignDriver(req.params.id);
+        res.json(vehicle);
+    } catch (err) {
+        res.status(err.status || 400).json({ error: err.message });
     }
 });
 

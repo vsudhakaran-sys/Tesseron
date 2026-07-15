@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/common/ui
 import {
   Car,
   ArrowLeft,
-  Plus,
+  Route,
   MapPin,
   User,
   FileText,
@@ -37,46 +37,31 @@ interface VehicleRow {
   assigned_driver_id: string | null;
 }
 
+// Trip row from GET /api/vehicles/:id/trips
+interface Trip {
+  trip_id: string;
+  driver_id: string | null;
+  trip_date: string | null;
+  origin: string | null;
+  destination: string | null;
+  distance_km: string | null;
+  duration_hr: string | null;
+  fuel_liters: string | null;
+  fuel_cost: string | null;
+  purpose: string | null;
+}
+
 function fmtDate(d: string | null): string {
   if (!d) return "—";
   const date = new Date(d);
   return isNaN(date.getTime()) ? "—" : date.toLocaleDateString();
 }
 
-const vehicleHistory = [
-  {
-    id: 1,
-    type: "damage",
-    message: "Damage 2026-00002 happened with driver GP Sky.",
-    date: "Jan 31, 2026",
-    icon: AlertTriangle,
-  },
-  {
-    id: 2,
-    type: "driver",
-    message: "New driver GP Sky was added.",
-    date: "Jan 31, 2026",
-    icon: User,
-  },
-  {
-    id: 3,
-    type: "license",
-    message: "New license plate 34-CD-AB was added.",
-    date: "Jul 22, 2020",
-    icon: FileText,
-  },
-  {
-    id: 4,
-    type: "status",
-    message: "Vehicle state changed to Active.",
-    date: "Jul 22, 2020",
-    icon: Car,
-  },
-];
-
 export default function VehicleDetail() {
   const { id } = useParams();
   const [vehicle, setVehicle] = useState<VehicleRow | null>(null);
+  const [trips, setTrips] = useState<Trip[]>([]);
+  const [tripsLoading, setTripsLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -86,6 +71,11 @@ export default function VehicleDetail() {
       .then(setVehicle)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
+
+    apiGet<Trip[]>(`/vehicles/${id}/trips?limit=25`)
+      .then(setTrips)
+      .catch(() => setTrips([]))
+      .finally(() => setTripsLoading(false));
   }, [id]);
 
   if (loading) {
@@ -280,42 +270,58 @@ export default function VehicleDetail() {
                 </div>
               </div>
 
-              {/* Vehicle history */}
+              {/* Vehicle history — trip timeline */}
               <div className="bg-card rounded-lg border border-border p-5 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold text-foreground">Vehicle history</h3>
-                  <Button variant="ghost" size="sm" className="text-primary">
-                    <Plus className="h-4 w-4 mr-1" />
-                    Add note
-                  </Button>
+                  <span className="text-xs text-muted-foreground">{trips.length} trips</span>
                 </div>
-                <div className="relative">
-                  {/* Timeline line */}
-                  <div className="absolute left-[5px] top-2 bottom-2 w-px bg-border" />
-                  
-                  <div className="space-y-4">
-                    {vehicleHistory.map((event, index) => (
-                      <div key={event.id} className="flex gap-4 relative">
-                        <div
-                          className={`w-3 h-3 rounded-full mt-1.5 z-10 ${
-                            index === 0 ? "bg-primary" : "bg-muted-foreground"
-                          }`}
-                        />
-                        <div className="flex-1 pb-4">
-                          <div className="flex items-start gap-2">
-                            <event.icon className="h-4 w-4 text-muted-foreground mt-0.5" />
-                            <div>
-                              <p className="text-sm text-foreground">{event.message}</p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                {event.date}
-                              </p>
+
+                {tripsLoading ? (
+                  <p className="text-sm text-muted-foreground">Loading trips…</p>
+                ) : trips.length === 0 ? (
+                  <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                    <FileText className="h-5 w-5 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">No trips recorded</span>
+                  </div>
+                ) : (
+                  <div className="relative max-h-[480px] overflow-y-auto pr-1">
+                    {/* Timeline line */}
+                    <div className="absolute left-[5px] top-2 bottom-2 w-px bg-border" />
+
+                    <div className="space-y-4">
+                      {trips.map((trip, index) => (
+                        <div key={trip.trip_id} className="flex gap-4 relative">
+                          <div
+                            className={`w-3 h-3 rounded-full mt-1.5 z-10 ${
+                              index === 0 ? "bg-primary" : "bg-muted-foreground"
+                            }`}
+                          />
+                          <div className="flex-1 pb-4">
+                            <div className="flex items-start gap-2">
+                              <Route className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm text-foreground">
+                                  {trip.origin || "—"} → {trip.destination || "—"}
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {fmtDate(trip.trip_date)}
+                                  {trip.purpose ? ` • ${formatType(trip.purpose)}` : ""}
+                                  {trip.driver_id ? ` • ${trip.driver_id}` : ""}
+                                </p>
+                                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-muted-foreground">
+                                  <span>{Number(trip.distance_km ?? 0).toLocaleString()} km</span>
+                                  <span>{Number(trip.duration_hr ?? 0)} hr</span>
+                                  <span>${Number(trip.fuel_cost ?? 0).toFixed(2)}</span>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
