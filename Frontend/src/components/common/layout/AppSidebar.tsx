@@ -42,11 +42,6 @@ export function AppSidebar({ isCollapsed, setIsCollapsed }: AppSidebarProps) {
       icon: <LayoutDashboard className="h-4 w-4" />,
     },
     {
-      label: t.nav.customers,
-      href: "/customers",
-      icon: <Users className="h-4 w-4" />,
-    },
-    {
       label: t.nav.vehicles || "Vehicles",
       href: "/vehicles",
       icon: <Car className="h-4 w-4" />,
