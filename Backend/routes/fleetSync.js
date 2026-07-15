@@ -16,6 +16,7 @@ const {
     saveUploadHistory,
     updateUploadHistory,
     getHistory,
+    getDrivers,
     getRecordsByUpload,
     exportUploadAsExcel,
 } = require('../services/dataService');
@@ -511,6 +512,17 @@ router.get('/history', async (_req, res) => {
     try {
         const history = await getHistory();
         res.json(history);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ─── GET /drivers ─────────────────────────────────────────────────────────────
+
+router.get('/drivers', async (_req, res) => {
+    try {
+        const drivers = await getDrivers();
+        res.json(drivers);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

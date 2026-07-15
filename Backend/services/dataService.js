@@ -347,6 +347,11 @@ async function getHistory() {
     return rows;
 }
 
+async function getDrivers() {
+    const [rows] = await pool.query('SELECT * FROM drivers ORDER BY driver_id ASC');
+    return rows;
+}
+
 async function getRecordsByUpload(uploadId) {
     const [rows] = await pool.query(
         'SELECT * FROM fleetsync WHERE upload_id = ? ORDER BY id ASC',
@@ -381,6 +386,7 @@ module.exports = {
     saveUploadHistory,
     updateUploadHistory,
     getHistory,
+    getDrivers,
     getRecordsByUpload,
     deleteRecordsByUpload,
     exportUploadAsExcel,
