@@ -16,13 +16,9 @@ import Vendors from "./pages/Vendors";
 import DriverPortal from "./pages/DriverPortal";
 import NotFound from "./pages/NotFound";
 
-import FleetSync from "./pages/FleetSync";
 import Login from "./pages/Login";
 import MfaSetup from "./pages/Login/MfaSetup";
 import MfaVerify from "./pages/Login/MfaVerify";
-import FuelData from "./pages/FuelData";
-// Route for compliance page added to handle non-technical security overview | params : none | returns : React Node
-import Compliance from "./pages/Compliance";
 import Customers from "./pages/Customers";
 import CustomerNew from "./pages/CustomerNew";
 import CustomerDetail from "./pages/CustomerDetail";
@@ -54,12 +50,11 @@ const App = () => (
               <Route path="/drivers/:id/edit" element={<DriverEdit />} />
               <Route path="/vendors" element={<Vendors />} />
               {/* Placeholder routes */}
-              <Route path="/fuel-data" element={<FuelData />} />
-              <Route path="/fleet-sync" element={<FleetSync />} />
+
               <Route path="/driver" element={<DriverPortal />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/help" element={<Dashboard />} />
-              <Route path="/compliance" element={<Compliance />} />
+
               <Route path="/customers" element={<Customers />} />
               <Route path="/customers/new" element={<CustomerNew />} />
               <Route path="/customers/:clientNumber" element={<CustomerDetail />} />

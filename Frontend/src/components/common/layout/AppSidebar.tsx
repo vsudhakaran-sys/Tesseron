@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/utils/utils";
 import {
@@ -7,11 +7,8 @@ import {
   ChevronRight,
   Menu,
   X,
-  Fuel,
-  RefreshCw,
   PanelLeftClose,
   PanelLeftOpen,
-  ShieldCheck,
   Settings,
   Users,
   Car,
@@ -26,14 +23,6 @@ interface NavItem {
   children?: { label: string; href: string }[];
 }
 
-// Compliance navigation item is added to the sidebar below the main nav but above Logout | params : none | returns : nav item obj
-const bottomNavItems: NavItem[] = [
-  {
-    label: "Compliance",
-    href: "/compliance",
-    icon: <ShieldCheck className="h-4 w-4" />,
-  }
-];
 
 interface AppSidebarProps {
   isCollapsed: boolean;
@@ -50,16 +39,6 @@ export function AppSidebar({ isCollapsed, setIsCollapsed }: AppSidebarProps) {
       label: t.nav.dashboard,
       href: "/",
       icon: <LayoutDashboard className="h-4 w-4" />,
-    },
-    {
-      label: t.nav.fleetSync,
-      href: "/fleet-sync",
-      icon: <RefreshCw className="h-4 w-4" />,
-    },
-    {
-      label: t.nav.fuelData,
-      href: "/fuel-data",
-      icon: <Fuel className="h-4 w-4" />,
     },
     {
       label: t.nav.customers,
@@ -129,7 +108,7 @@ export function AppSidebar({ isCollapsed, setIsCollapsed }: AppSidebarProps) {
                 src="/TESSERON.png" 
                 alt="TESSERON" 
                 className={cn(
-                  "h-10 w-auto object-contain transition-all duration-300 -ml-1.5", 
+                  "h-14 w-auto object-contain transition-all duration-300 -ml-1.5", 
                   isCollapsed && "hidden"
                 )} 
                 onError={(e) => { 
@@ -141,7 +120,7 @@ export function AppSidebar({ isCollapsed, setIsCollapsed }: AppSidebarProps) {
               <span className={cn(
                 "hidden items-center justify-center rounded-xl bg-primary/10 text-primary font-black text-2xl leading-none tracking-tighter h-11 w-11",
                 isCollapsed && "hidden"
-              )}>M</span>
+              )}>T</span>
             </div>
           </Link>
           
@@ -292,35 +271,6 @@ export function AppSidebar({ isCollapsed, setIsCollapsed }: AppSidebarProps) {
           isCollapsed ? "px-3 xl:px-4" : "px-4 xl:px-5"
         )}>
           <ul className="space-y-1.5 w-full flex flex-col items-center">
-            {bottomNavItems.map((item) => (
-              <li key={item.label} className="w-full">
-                <Link
-                  to={item.href!}
-                  title={isCollapsed ? item.label : undefined}
-                  className={cn(
-                    "relative flex items-center rounded-xl text-sm font-semibold transition-all duration-300 w-full outline-none border border-transparent",
-                    isCollapsed ? "justify-center p-3" : "gap-3 px-4 py-3",
-                    isActive(item.href!)
-                      ? "text-primary font-semibold"
-                      : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
-                  )}
-                >
-                  <span className={cn(
-                    "rounded-[10px] transition-colors flex items-center justify-center shrink-0",
-                    isCollapsed ? "p-0" : "p-1.5",
-                    isActive(item.href!)
-                      ? cn("text-primary", !isCollapsed && "bg-primary/10")
-                      : cn("text-slate-400 group-hover:text-primary", !isCollapsed && "bg-slate-100")
-                  )}>
-                    {item.icon}
-                  </span>
-                  {!isCollapsed && <span className="truncate whitespace-nowrap">{item.label}</span>}
-                  {isActive(item.href!) && (
-                    <span className="absolute right-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full bg-primary" />
-                  )}
-                </Link>
-              </li>
-            ))}
 
             {/* Settings (admin & system settings) */}
             <li className="w-full">

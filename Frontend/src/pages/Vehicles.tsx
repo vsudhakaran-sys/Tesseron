@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/feature-specific/fleet/PageHeader";
 import { StatusBadge } from "@/components/feature-specific/fleet/StatusBadge";
@@ -21,6 +21,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/common/ui/dropdown-menu";
 import { Plus, Search, MoreHorizontal, Filter, Download } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/common/ui/sheet";
+import { VehicleForm } from "@/components/feature-specific/fleet/VehicleForm";
 
 // Mock data for vehicles
 const initialVehiclesDataRaw = [
@@ -464,9 +466,10 @@ export function deleteVehicle(id: string | number): void {
 
 export default function Vehicles() {
   const navigate = useNavigate();
-  const [vehicles] = useState<any[]>(() => [...vehiclesData]);
+  const [vehicles, setVehicles] = useState<any[]>(() => [...vehiclesData]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>("active");
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
   const filteredVehicles = vehicles.filter((vehicle) => {
     const matchesSearch =
@@ -488,7 +491,7 @@ export default function Vehicles() {
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
-            <Button onClick={() => navigate("/vehicles/new")}>
+            <Button onClick={() => setIsAddOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Add Vehicle
             </Button>
@@ -612,9 +615,9 @@ export default function Vehicles() {
                       <DropdownMenuItem asChild>
                         <Link to={`/vehicles/${vehicle.id}`}>View Details</Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate(`/vehicles/${vehicle.id}/edit`)}>Edit</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate(`/vehicles/${vehicle.id}?edit=true`)}>Edit</DropdownMenuItem>
                       <DropdownMenuItem>Assign Driver</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive" onClick={() => navigate(`/vehicles/${vehicle.id}/edit`)}>Delete</DropdownMenuItem>
+                      <DropdownMenuItem className="text-destructive" onClick={() => navigate(`/vehicles/${vehicle.id}?edit=true`)}>Delete</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
@@ -624,6 +627,22 @@ export default function Vehicles() {
         </Table>
       </div>
 
+      <Sheet open={isAddOpen} onOpenChange={setIsAddOpen}>
+        <SheetContent className="sm:max-w-2xl overflow-y-auto z-[100]">
+          <SheetHeader className="mb-6">
+            <SheetTitle>Add Vehicle</SheetTitle>
+          </SheetHeader>
+          <VehicleForm
+            vehicle={null}
+            onCancel={() => setIsAddOpen(false)}
+            onSaved={(newVehicle) => {
+              addVehicle(newVehicle);
+              setIsAddOpen(false);
+              setVehicles([...vehiclesData]);
+            }}
+          />
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

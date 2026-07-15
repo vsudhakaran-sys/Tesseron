@@ -1,4 +1,5 @@
-import { Link, useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { PageHeader } from "@/components/feature-specific/fleet/PageHeader";
 import { StatusBadge } from "@/components/feature-specific/fleet/StatusBadge";
 import { StatsCard } from "@/components/feature-specific/fleet/StatsCard";
@@ -8,6 +9,8 @@ import { VehicleData } from "@/components/feature-specific/fleet/VehicleData";
 import { VehicleTechnicalData } from "@/components/feature-specific/fleet/VehicleTechnicalData";
 import { Button } from "@/components/common/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/common/ui/tabs";
+import { getVehicleById, updateVehicle } from "./Vehicles";
+import { VehicleForm } from "@/components/feature-specific/fleet/VehicleForm";
 import {
   Car,
   ArrowLeft,
@@ -18,7 +21,6 @@ import {
   User,
   Gauge,
   FileText,
-  CreditCard,
   AlertTriangle,
   Receipt,
   ClipboardList,
@@ -80,6 +82,45 @@ const vehicleHistory = [
 
 export default function VehicleDetail() {
   const { id } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [isEditing, setIsEditing] = useState(false);
+  const [vehicle, setVehicle] = useState<any>(() => ({ ...vehicleData, ...(getVehicleById(id ?? "") || {}) }));
+
+  useEffect(() => {
+    if (searchParams.get("edit") === "true") {
+      setIsEditing(true);
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete("edit");
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
+  if (isEditing) {
+    return (
+      <div className="space-y-6 animate-fade-in max-w-5xl mx-auto">
+        <div className="flex items-start gap-4">
+          <Button variant="ghost" size="icon" onClick={() => setIsEditing(false)} className="mt-1">
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl font-semibold text-foreground">Edit {vehicle.displayName}</h1>
+            <p className="text-sm text-muted-foreground">
+              {vehicle.manufacturer} {vehicle.model}
+            </p>
+          </div>
+        </div>
+        <VehicleForm
+          vehicle={vehicle}
+          onCancel={() => setIsEditing(false)}
+          onSaved={(updatedVehicle) => {
+            updateVehicle(updatedVehicle);
+            setVehicle(prev => ({ ...prev, ...updatedVehicle }));
+            setIsEditing(false);
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -93,14 +134,18 @@ export default function VehicleDetail() {
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-2xl font-semibold text-foreground">
-              {vehicleData.displayName}
+              {vehicle.displayName}
             </h1>
-            <StatusBadge status={vehicleData.status} />
+            <StatusBadge status={vehicle.status} />
           </div>
           <p className="text-sm text-muted-foreground">
-            {vehicleData.manufacturer} {vehicleData.model} • {vehicleData.type}
+            {vehicle.manufacturer} {vehicle.model} • {vehicle.type}
           </p>
         </div>
+        <Button variant="outline" onClick={() => setIsEditing(true)} className="shrink-0">
+          <Edit className="h-4 w-4 mr-1.5" />
+          Edit
+        </Button>
       </div>
 
       {/* Tabs */}
@@ -112,7 +157,7 @@ export default function VehicleDetail() {
           <TabsTrigger value="drivers">Drivers</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="contracts">Contracts</TabsTrigger>
-          <TabsTrigger value="fuel-cards">Fuel cards</TabsTrigger>
+
           <TabsTrigger value="damages">Damages</TabsTrigger>
           <TabsTrigger value="invoices">Invoices</TabsTrigger>
           <TabsTrigger value="tasks">Tasks</TabsTrigger>
@@ -327,15 +372,7 @@ export default function VehicleDetail() {
           <VehicleContracts />
         </TabsContent>
 
-        <TabsContent value="fuel-cards" className="mt-6">
-          <div className="bg-card rounded-lg border border-border p-8 text-center">
-            <CreditCard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="font-semibold text-foreground mb-2">Fuel Cards</h3>
-            <p className="text-muted-foreground">
-              Linked fuel cards and transaction history.
-            </p>
-          </div>
-        </TabsContent>
+
 
         <TabsContent value="damages" className="mt-6">
           <div className="bg-card rounded-lg border border-border p-8 text-center">
