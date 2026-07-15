@@ -19,9 +19,6 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import MfaSetup from "./pages/Login/MfaSetup";
 import MfaVerify from "./pages/Login/MfaVerify";
-import Customers from "./pages/Customers";
-import CustomerNew from "./pages/CustomerNew";
-import CustomerDetail from "./pages/CustomerDetail";
 import Settings from "./pages/Settings";
 
 import { LanguageProvider } from "@/hooks/useLanguage";
@@ -54,10 +51,6 @@ const App = () => (
               <Route path="/driver" element={<DriverPortal />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/help" element={<Dashboard />} />
-
-              <Route path="/customers" element={<Customers />} />
-              <Route path="/customers/new" element={<CustomerNew />} />
-              <Route path="/customers/:clientNumber" element={<CustomerDetail />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

@@ -463,10 +463,6 @@ export default function Drivers() {
         description="Manage fleet drivers and assignments"
         actions={
           <div className="flex items-center gap-3">
-            <Button variant="outline">
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
             <Button onClick={() => navigate("/drivers/new")}>
               <Plus className="h-4 w-4 mr-2" />
               Add Driver
@@ -582,7 +578,7 @@ export default function Drivers() {
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     {driver.assigned_vehicle_id ? (
                       <Link
-                        to="/vehicles"
+                        to={`/vehicles/${driver.assigned_vehicle_id}`}
                         className="text-primary hover:underline text-sm"
                       >
                         {[driver.vehicle_make, driver.vehicle_model]

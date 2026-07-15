@@ -383,7 +383,10 @@ async function getMaintenance() {
         SELECT m.*,
                v.plate AS vehicle_plate,
                v.make  AS vehicle_make,
-               v.model AS vehicle_model
+               v.model AS vehicle_model,
+               v.odometer_km AS vehicle_odometer,
+               v.last_service_date AS vehicle_last_service_date,
+               v.last_service_odometer_km AS vehicle_last_service_odometer
         FROM maintenance m
         LEFT JOIN vehicles v ON v.vehicle_id = m.vehicle_id
         ORDER BY m.service_date DESC

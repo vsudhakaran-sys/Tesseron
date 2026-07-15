@@ -125,10 +125,6 @@ export default function Vendors() {
         description="Manage fleet service providers and contracts"
         actions={
           <div className="flex items-center gap-3">
-            <Button variant="outline">
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
               Add Vendor

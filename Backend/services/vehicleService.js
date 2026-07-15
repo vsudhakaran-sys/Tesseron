@@ -8,12 +8,22 @@ const VEHICLE_COLUMNS = [
 ];
 
 async function getAllVehicles() {
-    const [rows] = await pool.query('SELECT * FROM vehicles ORDER BY vehicle_id ASC');
+    const [rows] = await pool.query(`
+        SELECT v.*, d.name AS assigned_driver_name
+        FROM vehicles v
+        LEFT JOIN drivers d ON v.assigned_driver_id = d.driver_id
+        ORDER BY v.vehicle_id ASC
+    `);
     return rows;
 }
 
 async function getVehicleById(vehicleId) {
-    const [rows] = await pool.query('SELECT * FROM vehicles WHERE vehicle_id = ?', [vehicleId]);
+    const [rows] = await pool.query(`
+        SELECT v.*, d.name AS assigned_driver_name
+        FROM vehicles v
+        LEFT JOIN drivers d ON v.assigned_driver_id = d.driver_id
+        WHERE v.vehicle_id = ?
+    `, [vehicleId]);
     return rows[0] || null;
 }
 

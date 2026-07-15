@@ -53,7 +53,12 @@ async function assignDriver(vehicleId, driverId) {
         await conn.query('UPDATE drivers SET assigned_vehicle_id = ? WHERE driver_id = ?', [vehicleId, driverId]);
 
         await conn.commit();
-        const [[updated]] = await conn.query('SELECT * FROM vehicles WHERE vehicle_id = ?', [vehicleId]);
+        const [[updated]] = await conn.query(`
+            SELECT v.*, d.name AS assigned_driver_name
+            FROM vehicles v
+            LEFT JOIN drivers d ON v.assigned_driver_id = d.driver_id
+            WHERE v.vehicle_id = ?
+        `, [vehicleId]);
         return updated;
     } catch (err) {
         await conn.rollback();
@@ -78,7 +83,12 @@ async function unassignDriver(vehicleId) {
         }
 
         await conn.commit();
-        const [[updated]] = await conn.query('SELECT * FROM vehicles WHERE vehicle_id = ?', [vehicleId]);
+        const [[updated]] = await conn.query(`
+            SELECT v.*, d.name AS assigned_driver_name
+            FROM vehicles v
+            LEFT JOIN drivers d ON v.assigned_driver_id = d.driver_id
+            WHERE v.vehicle_id = ?
+        `, [vehicleId]);
         return updated;
     } catch (err) {
         await conn.rollback();

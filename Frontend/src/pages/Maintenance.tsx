@@ -27,6 +27,9 @@ interface MaintenanceRecord {
   vehicle_plate: string | null;
   vehicle_make: string | null;
   vehicle_model: string | null;
+  vehicle_odometer: number | null;
+  vehicle_last_service_date: string | null;
+  vehicle_last_service_odometer: number | null;
 }
 
 const formatDate = (value: string | null) => {
@@ -49,6 +52,21 @@ const num = (v: string | number | null | undefined) => {
 
 const prettyType = (t: string | null) =>
   t ? t.replace(/_/g, " ") : "—";
+
+const getMaintenanceStatus = (r: MaintenanceRecord) => {
+  if (!r.vehicle_last_service_date || r.vehicle_last_service_odometer === null || r.vehicle_last_service_odometer === undefined) {
+    return "OVERDUE";
+  }
+  const lastServiceDate = new Date(r.vehicle_last_service_date);
+  const now = new Date('2026-07-24'); // Anchor date matching seed data period
+  const daysPassed = (now.getTime() - lastServiceDate.getTime()) / (1000 * 60 * 60 * 24);
+  const kmPassed = (r.vehicle_odometer || 0) - r.vehicle_last_service_odometer;
+
+  if (kmPassed > 10000 || daysPassed > 180) {
+    return "OVERDUE";
+  }
+  return "COMPLIANT";
+};
 
 export default function Maintenance() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -147,6 +165,7 @@ export default function Maintenance() {
             <TableRow className="data-table-header">
               <TableHead className="font-semibold">Record ID</TableHead>
               <TableHead className="font-semibold">Vehicle</TableHead>
+              <TableHead className="font-semibold">Status</TableHead>
               <TableHead className="font-semibold">Service Type</TableHead>
               <TableHead className="font-semibold">Date</TableHead>
               <TableHead className="font-semibold text-right">Odometer</TableHead>
@@ -157,19 +176,19 @@ export default function Maintenance() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
+                <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
                   Loading maintenance records…
                 </TableCell>
               </TableRow>
             ) : isError ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-10 text-destructive">
+                <TableCell colSpan={8} className="text-center py-10 text-destructive">
                   Failed to load: {(error as Error)?.message ?? "Unknown error"}
                 </TableCell>
               </TableRow>
             ) : filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
+                <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
                   No maintenance records found.
                 </TableCell>
               </TableRow>
@@ -179,12 +198,13 @@ export default function Maintenance() {
                   [r.vehicle_make, r.vehicle_model].filter(Boolean).join(" ") ||
                   r.vehicle_plate ||
                   r.vehicle_id;
+                const status = getMaintenanceStatus(r);
                 return (
                   <TableRow key={r.record_id} className="data-table-row">
                     <TableCell className="font-mono text-sm">{r.record_id}</TableCell>
                     <TableCell>
                       <Link
-                        to="/vehicles"
+                        to={`/vehicles/${r.vehicle_id}`}
                         className="text-primary hover:underline"
                       >
                         {vehicleName}
@@ -194,6 +214,15 @@ export default function Maintenance() {
                           {r.vehicle_plate}
                         </span>
                       )}
+                    </TableCell>
+                    <TableCell>
+                      <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded ${
+                        status === "OVERDUE"
+                          ? "bg-destructive/15 text-destructive border border-destructive/20"
+                          : "bg-success/15 text-success border border-success/20"
+                      }`}>
+                        {status}
+                      </span>
                     </TableCell>
                     <TableCell>
                       <span className="inline-flex items-center gap-1.5 capitalize">

@@ -106,6 +106,7 @@ interface VehicleRow {
   status: string | null;
   odometer_km: number | null;
   assigned_driver_id: string | null;
+  assigned_driver_name?: string | null;
 }
 
 // Status values stored in DB, with label + badge colors.
@@ -139,7 +140,8 @@ function mapVehicle(row: VehicleRow) {
     manufacturer: row.make || "—",
     model: row.model || "—",
     type: row.type || "",
-    driver: row.assigned_driver_id || "",
+    driverId: row.assigned_driver_id || "",
+    driverName: row.assigned_driver_name || row.assigned_driver_id || "",
     mileage: row.odometer_km ?? 0,
     age: row.year ? currentYear - row.year : 0,
     status: row.status || "",
@@ -175,15 +177,11 @@ export default function Vehicles() {
 
   // Reflect a new assignment in the table without a full refetch.
   const handleAssigned = (vehicleId: string, driverId: string) => {
-    setVehicles((prev) =>
-      prev.map((v) => (v.id === vehicleId ? { ...v, driver: driverId } : v))
-    );
+    fetchVehicles();
   };
 
   const handleUnassigned = (vehicleId: string) => {
-    setVehicles((prev) =>
-      prev.map((v) => (v.id === vehicleId ? { ...v, driver: "" } : v))
-    );
+    fetchVehicles();
   };
 
   const handleDelete = (vehicleId: string) => {
@@ -198,10 +196,14 @@ export default function Vehicles() {
   };
 
   const filteredVehicles = vehicles.filter((vehicle) => {
+    const q = searchQuery.toLowerCase();
     const matchesSearch =
-      vehicle.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      vehicle.manufacturer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      vehicle.model.toLowerCase().includes(searchQuery.toLowerCase());
+      vehicle.displayName.toLowerCase().includes(q) ||
+      vehicle.manufacturer.toLowerCase().includes(q) ||
+      vehicle.model.toLowerCase().includes(q) ||
+      vehicle.status.toLowerCase().includes(q) ||
+      vehicle.driverId.toLowerCase().includes(q) ||
+      vehicle.driverName.toLowerCase().includes(q);
     const matchesStatus = !statusFilter || vehicle.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -217,10 +219,6 @@ export default function Vehicles() {
         description="Manage your fleet vehicles"
         actions={
           <div className="flex items-center gap-3">
-            <Button variant="outline">
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
             <Button onClick={() => setIsAddOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Add Vehicle
@@ -310,9 +308,9 @@ export default function Vehicles() {
                 <TableCell className="text-foreground">{vehicle.model}</TableCell>
                 <TableCell className="text-foreground">{formatType(vehicle.type)}</TableCell>
                 <TableCell onClick={(e) => e.stopPropagation()}>
-                  {vehicle.driver ? (
-                    <Link to="/drivers" className="text-primary hover:underline">
-                      {vehicle.driver}
+                  {vehicle.driverId ? (
+                    <Link to={`/drivers/${vehicle.driverId}`} className="text-primary hover:underline">
+                      {vehicle.driverName}
                     </Link>
                   ) : (
                     <span className="text-muted-foreground">—</span>
@@ -430,7 +428,7 @@ export default function Vehicles() {
           vehicleId={assignTarget.id}
           vehicleName={assignTarget.displayName}
           vehicleStatus={assignTarget.status}
-          currentDriverId={assignTarget.driver || undefined}
+          currentDriverId={assignTarget.driverId || undefined}
           onAssigned={handleAssigned}
           onUnassigned={handleUnassigned}
         />

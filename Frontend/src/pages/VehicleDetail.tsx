@@ -31,6 +31,7 @@ interface VehicleRow {
   last_service_date: string | null;
   last_service_odometer_km: number | null;
   assigned_driver_id: string | null;
+  assigned_driver_name?: string | null;
 }
 
 // Trip row from GET /api/vehicles/:id/trips
@@ -200,8 +201,8 @@ export default function VehicleDetail() {
                     <div className="flex justify-between py-0.5 border-b border-border/40">
                       <span className="text-muted-foreground">Assigned driver</span>
                       {vehicle.assigned_driver_id ? (
-                        <Link to="/drivers" className="text-primary hover:underline">
-                          {vehicle.assigned_driver_id}
+                        <Link to={`/drivers/${vehicle.assigned_driver_id}`} className="text-primary hover:underline">
+                          {vehicle.assigned_driver_name || vehicle.assigned_driver_id}
                         </Link>
                       ) : (
                         <span className="text-muted-foreground">Unassigned</span>
