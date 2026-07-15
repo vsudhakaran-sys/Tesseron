@@ -1,0 +1,454 @@
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 
+   TESSERON Premium Design System - Fleet Management
+   Built with OKLCH & CSS Variables (12px Root Base)
+   Palette: Curated Blue & Slate
+*/
+
+@layer base {
+  :root {
+    /* ── 1. Color Palette (Raw Scales) ── */
+
+    /* Curated Blue Palette (Base Accents) */
+    --color-blue-50: oklch(96.6% 0.016 262.774);   /* #eef4ff */
+    --color-blue-100: oklch(92.4% 0.036 265.153);  /* #dae6ff */
+    --color-blue-200: oklch(86.9% 0.064 261.601);  /* #bdd5ff */
+    --color-blue-300: oklch(78.7% 0.108 259.346);  /* #90bbff */
+    --color-blue-400: oklch(68.1% 0.163 260.875);  /* #5c96fc */
+    --color-blue-500: oklch(58.6% 0.211 263.618);  /* #3670f7 */
+    --color-blue-600: oklch(51.1% 0.239 264.995);  /* #2050ec */
+    --color-blue-700: oklch(45.9% 0.237 265.522);  /* #183dd9 */
+    --color-blue-800: oklch(40.1% 0.198 266.799);  /* #1a33b0 */
+    --color-blue-900: oklch(35.7% 0.151 267.534);  /* #1b308a */
+
+    /* Warm-Shifted Slate (Neutrals) */
+    --color-slate-25: oklch(99.1% 0.001 287.332);  /* #fcfcfd */
+    --color-slate-50: oklch(98.2% 0.003 264.7);    /* #f8f9fb */
+    --color-slate-100: oklch(96.3% 0.005 258.369); /* #f1f3f6 */
+    --color-slate-200: oklch(92.7% 0.007 260.767); /* #e4e7ec */
+    --color-slate-300: oklch(86.2% 0.012 259.839); /* #cdd2da */
+    --color-slate-400: oklch(70.7% 0.027 263.289); /* #98a1b2 */
+    --color-slate-500: oklch(56.4% 0.032 263.309); /* #6c7689 */
+    --color-slate-600: oklch(45.9% 0.028 264.253); /* #505868 */
+    --color-slate-700: oklch(38.7% 0.03 267.436);  /* #3d4455 */
+    --color-slate-800: oklch(30.3% 0.03 268.6);    /* #282e3e */
+    --color-slate-900: oklch(24.2% 0.03 269.887);  /* #1a1f2e */
+    --color-slate-950: oklch(18.8% 0.019 270.209); /* #10131c */
+
+    /* ── 2. Typography & Fonts ── */
+    --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
+    --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+    /* Typography Scales */
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+    --text-3xl: 1.875rem;
+    --text-4xl: 2.25rem;
+    --text-5xl: 3rem;
+    --text-7xl: 4.5rem;
+
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    --leading-none: 1;
+    --leading-tight: 1.25;
+    --leading-snug: 1.375;
+    --leading-normal: 1.5;
+    --leading-relaxed: 1.625;
+
+    /* ── 3. Layout, Borders & Durations ── */
+    --radius: 0.75rem;
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.5rem;
+    --radius-full: 9999px;
+
+    --default-transition-duration: 0.2s;
+    --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Container Constraints */
+    --container-sm: 24rem;
+    --container-md: 28rem;
+    --container-lg: 32rem;
+    --container-xl: 36rem;
+    --container-2xl: 42rem;
+    --container-5xl: 64rem;
+    --container-6xl: 72rem;
+
+    /* ── 4. Semantic Color Mapping (Light Mode - Default) ── */
+    --background: var(--color-slate-50);
+    --foreground: var(--color-slate-900);
+
+    --card: var(--color-slate-25);
+    --card-foreground: var(--color-slate-900);
+
+    --popover: var(--color-slate-25);
+    --popover-foreground: var(--color-slate-900);
+
+    --primary: var(--color-blue-600);
+    --primary-foreground: #ffffff;
+
+    --secondary: var(--color-slate-200);
+    --secondary-foreground: var(--color-slate-800);
+
+    --muted: var(--color-slate-100);
+    --muted-foreground: var(--color-slate-500);
+
+    --accent: var(--color-blue-100);
+    --accent-foreground: var(--color-blue-800);
+
+    --destructive: oklch(57.7% 0.205 27.36); /* Curated premium red */
+    --destructive-foreground: #ffffff;
+
+    --success: oklch(62.8% 0.15 145.45);     /* Curated premium green */
+    --success-foreground: #ffffff;
+
+    --warning: oklch(76.2% 0.14 78.5);        /* Curated premium amber */
+    --warning-foreground: var(--color-slate-900);
+
+    --info: var(--color-blue-500);
+    --info-foreground: #ffffff;
+
+    --border: var(--color-slate-200);
+    --input: var(--color-slate-200);
+    --ring: var(--color-blue-500);
+
+    /* Sidebar - Premium Deep Slate */
+    --sidebar-background: var(--color-slate-950);
+    --sidebar-foreground: var(--color-slate-300);
+    --sidebar-primary: var(--color-blue-600);
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: var(--color-slate-900);
+    --sidebar-accent-foreground: var(--color-slate-100);
+    --sidebar-border: var(--color-slate-900);
+    --sidebar-ring: var(--color-blue-500);
+    --sidebar-muted: var(--color-slate-800);
+  }
+
+  /* ── 5. Reverted Dark Mode (Original HSL Palette) ── */
+  .dark {
+    --background: hsl(236 50% 4%);
+    --foreground: hsl(236 20% 98%);
+
+    --card: hsl(236 50% 6%);
+    --card-foreground: hsl(236 20% 98%);
+
+    --popover: hsl(236 50% 6%);
+    --popover-foreground: hsl(236 20% 98%);
+
+    --primary: hsl(236 83% 51%);
+    --primary-foreground: hsl(0 0% 100%);
+
+    --secondary: hsl(236 30% 12%);
+    --secondary-foreground: hsl(236 20% 98%);
+
+    --muted: hsl(236 30% 10%);
+    --muted-foreground: hsl(236 20% 65%);
+
+    --accent: hsl(236 50% 15%);
+    --accent-foreground: hsl(236 20% 98%);
+
+    --border: hsl(236 30% 15%);
+    --input: hsl(236 30% 15%);
+    --ring: hsl(236 83% 51%);
+
+    --success: hsl(142 60% 40%);
+    --success-foreground: hsl(0 0% 100%);
+    --warning: hsl(38 80% 45%);
+    --warning-foreground: hsl(0 0% 100%);
+    --info: hsl(212 60% 55%);
+    --info-foreground: hsl(0 0% 100%);
+
+    /* Sidebar - Premium Deep Blue */
+    --sidebar-background: hsl(236 60% 12%);
+    --sidebar-foreground: hsl(236 20% 90%);
+    --sidebar-primary: hsl(236 83% 51%);
+    --sidebar-primary-foreground: hsl(0 0% 100%);
+    --sidebar-accent: hsl(236 50% 20%);
+    --sidebar-accent-foreground: hsl(0 0% 100%);
+    --sidebar-border: hsl(236 50% 20%);
+    --sidebar-ring: hsl(236 83% 51%);
+    --sidebar-muted: hsl(236 30% 10%);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+    letter-spacing: -0.01em;
+  }
+
+  ::selection {
+    background-color: var(--color-blue-100);
+    color: var(--color-blue-900);
+  }
+
+  html {
+    font-size: 12px;
+  }
+
+  /* --- CUSTOM PREMIUM SCROLLBAR --- */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-blue-200);
+    border-radius: 10px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-blue-300);
+  }
+  
+  .dark ::-webkit-scrollbar-thumb {
+    background: var(--color-blue-800);
+  }
+  
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-blue-700);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold tracking-tight text-foreground;
+    font-family: var(--font-display);
+  }
+}
+
+@layer components {
+
+  /* --- PROFESSIONAL BACKGROUND --- */
+  .mesh-gradient {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    overflow: hidden;
+    background-color: #f8fafc;
+    /* Very light cool gray */
+  }
+
+  .mesh-gradient::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image:
+      radial-gradient(at 0% 0%, hsla(236, 79%, 51%, 0.03) 0, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(236, 79%, 51%, 0.02) 0, transparent 50%);
+  }
+
+  /* --- GLASSMORPHISM UTILITIES --- */
+  .glass-card {
+    @apply bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-300;
+  }
+
+  .glass-header {
+    background-color: rgba(255, 255, 255, 0.98);
+    @apply border-b border-slate-200 shadow-sm;
+  }
+
+  .glass-sidebar {
+    background-color: #0f172a;
+    /* Solid deep navy for professional look */
+    @apply border-r border-slate-800 shadow-xl;
+  }
+
+  /* --- UI ENHANCEMENTS --- */
+  .premium-shadow {
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  }
+
+  .premium-button {
+    @apply transition-all duration-200 active:scale-[0.98];
+  }
+
+  /* KPI Cards */
+  .kpi-card {
+    @apply glass-card p-5 rounded-xl hover:shadow-md;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .kpi-card:hover {
+    border-color: var(--color-blue-300);
+  }
+
+  /* Data Table Refinement */
+  .data-table-container {
+    @apply glass-card rounded-xl overflow-hidden;
+  }
+
+  .data-table-header {
+    @apply bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-widest px-6 py-3;
+  }
+
+  .data-table-row {
+    @apply border-b border-slate-100 hover:bg-slate-50/80 transition-colors cursor-pointer;
+  }
+
+  /* Status Badges */
+  .status-badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold;
+  }
+
+  .status-active {
+    @apply bg-emerald-50 text-emerald-700 border border-emerald-100;
+  }
+
+  .status-warning {
+    @apply bg-amber-50 text-amber-700 border border-amber-100;
+  }
+
+  .status-critical {
+    @apply bg-rose-50 text-rose-700 border border-rose-100;
+  }
+
+  /* --- SKELETON LOADING --- */
+  .skeleton {
+    @apply bg-slate-200 rounded-lg overflow-hidden relative;
+    background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+    background-size: 400% 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+  }
+
+  .skeleton-dark {
+    background: linear-gradient(90deg, #cbd5e1 25%, #e2e8f0 50%, #cbd5e1 75%);
+    background-size: 400% 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+  }
+
+  /* --- STAGGER ANIMATION HELPERS --- */
+  .animate-stagger-1 {
+    animation-delay: 0ms;
+  }
+
+  .animate-stagger-2 {
+    animation-delay: 80ms;
+  }
+
+  .animate-stagger-3 {
+    animation-delay: 160ms;
+  }
+
+  .animate-stagger-4 {
+    animation-delay: 240ms;
+  }
+
+  .animate-stagger-5 {
+    animation-delay: 320ms;
+  }
+
+  .animate-stagger-6 {
+    animation-delay: 400ms;
+  }
+}
+
+@keyframes barRise {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes jumping-dots {
+
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(-5px);
+  }
+}
+
+.jumping-dots {
+  display: inline-flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.jumping-dots span {
+  display: inline-block;
+  animation: jumping-dots 1.4s infinite ease-in-out both;
+  color: #1A28EA !important;
+}
+
+.jumping-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.jumping-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* --- ARIA PREMIUM DESIGN SYSTEM ADDITIONS --- */
+.aria-card {
+  @apply bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/50 shadow-lg shadow-slate-100/40 dark:shadow-none transition-all duration-300 hover:shadow-xl hover:shadow-slate-200/30 dark:hover:shadow-none hover:-translate-y-0.5;
+}
+.aria-input {
+  @apply transition-all duration-200 hover:border-slate-300 dark:hover:border-slate-700 bg-white/50 dark:bg-slate-900/50;
+  outline: none;
+}
+.aria-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2.5px rgba(54, 112, 247, 0.18);
+}
+
+.aria-glow-blue {
+  box-shadow: 0 0 20px -5px rgba(54, 112, 247, 0.15);
+}
+.aria-glow-emerald {
+  box-shadow: 0 0 20px -5px rgba(16, 185, 129, 0.15);
+}
+.aria-glow-rose {
+  box-shadow: 0 0 20px -5px rgba(244, 63, 94, 0.15);
+}
+.aria-glow-amber {
+  box-shadow: 0 0 20px -5px rgba(245, 158, 11, 0.15);
+}
+.aria-btn-primary {
+  @apply relative overflow-hidden transition-all duration-300 active:scale-[0.98] hover:shadow-lg;
+}
+.aria-btn-primary:hover {
+  box-shadow: 0 10px 15px -3px rgba(54, 112, 247, 0.2), 0 4px 6px -4px rgba(54, 112, 247, 0.2);
+}
+.aria-btn-secondary {
+  @apply transition-all duration-300 hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-[0.98];
+}
