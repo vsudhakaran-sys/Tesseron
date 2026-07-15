@@ -31,3 +31,5 @@ Backend/prisma/
 *.md
 fleetdash2.0-uat/*
 docs/*
+.agents/
+skills-lock.json
