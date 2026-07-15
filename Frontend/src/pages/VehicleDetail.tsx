@@ -1,7 +1,7 @@
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { PageHeader } from "@/components/feature-specific/fleet/PageHeader";
-import { StatusBadge } from "@/components/feature-specific/fleet/StatusBadge";
-import { StatsCard } from "@/components/feature-specific/fleet/StatsCard";
+import { apiGet } from "@/services/api";
+import { VehicleStatusBadge, formatType } from "./Vehicles";
 import { VehicleContracts } from "@/components/feature-specific/fleet/VehicleContracts";
 import { VehicleDocuments } from "@/components/feature-specific/fleet/VehicleDocuments";
 import { VehicleData } from "@/components/feature-specific/fleet/VehicleData";
@@ -11,12 +11,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/common/ui
 import {
   Car,
   ArrowLeft,
-  Edit,
   Plus,
-  Calendar,
   MapPin,
   User,
-  Gauge,
   FileText,
   CreditCard,
   AlertTriangle,
@@ -24,28 +21,27 @@ import {
   ClipboardList,
 } from "lucide-react";
 
-// Mock vehicle data
-const vehicleData = {
-  id: 1,
-  displayName: "34-CD-AB",
-  type: "Car",
-  manufacturer: "BMW",
-  model: "3 Series",
-  status: "active" as const,
-  internalId: "1d55869f-90b1-4023-9328-a7c402e42df4",
-  organization: "Root Organization",
-  isAvailable: true,
-  currentDriver: "GP Sky",
-  currentMileage: null,
-  age: null,
-  registrationDate: null,
-  financing: null,
-  activeInFleetSince: "Jul 22, 2020",
-  monitoringEnabled: true,
-  cost: 4.03,
-  distance: 0,
-  totalFuel: 0,
-};
+// DB row shape from GET /api/vehicles/:id
+interface VehicleRow {
+  vehicle_id: string;
+  plate: string | null;
+  make: string | null;
+  model: string | null;
+  year: number | null;
+  type: string | null;
+  status: string | null;
+  odometer_km: number | null;
+  acquisition_date: string | null;
+  last_service_date: string | null;
+  last_service_odometer_km: number | null;
+  assigned_driver_id: string | null;
+}
+
+function fmtDate(d: string | null): string {
+  if (!d) return "—";
+  const date = new Date(d);
+  return isNaN(date.getTime()) ? "—" : date.toLocaleDateString();
+}
 
 const vehicleHistory = [
   {
@@ -80,6 +76,36 @@ const vehicleHistory = [
 
 export default function VehicleDetail() {
   const { id } = useParams();
+  const [vehicle, setVehicle] = useState<VehicleRow | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+    apiGet<VehicleRow>(`/vehicles/${id}`)
+      .then(setVehicle)
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  if (loading) {
+    return <div className="p-8 text-muted-foreground">Loading…</div>;
+  }
+  if (error || !vehicle) {
+    return (
+      <div className="p-8">
+        <Button variant="ghost" size="sm" asChild className="mb-4">
+          <Link to="/vehicles">
+            <ArrowLeft className="h-4 w-4 mr-1" /> Back
+          </Link>
+        </Button>
+        <p className="text-destructive">{error || "Vehicle not found"}</p>
+      </div>
+    );
+  }
+
+  const displayName = vehicle.plate || vehicle.vehicle_id;
+  const age = vehicle.year ? new Date().getFullYear() - vehicle.year : null;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -93,12 +119,12 @@ export default function VehicleDetail() {
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-2xl font-semibold text-foreground">
-              {vehicleData.displayName}
+              {displayName}
             </h1>
-            <StatusBadge status={vehicleData.status} />
+            <VehicleStatusBadge status={vehicle.status || ""} />
           </div>
           <p className="text-sm text-muted-foreground">
-            {vehicleData.manufacturer} {vehicleData.model} • {vehicleData.type}
+            {vehicle.make || "—"} {vehicle.model || ""} • {formatType(vehicle.type)}
           </p>
         </div>
       </div>
@@ -126,40 +152,41 @@ export default function VehicleDetail() {
               <div className="bg-card rounded-lg border border-border p-5 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
                   <h3 className="font-semibold text-foreground">KPIs</h3>
-                  <span className="text-sm text-muted-foreground">•</span>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
-                    From Aug, 2025 Until Jan, 2026
-                  </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="p-4 rounded-lg bg-muted/30">
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
-                      Cost
+                      Odometer
                     </p>
                     <p className="text-xl font-semibold text-primary">
-                      EUR {vehicleData.cost.toFixed(2)}
+                      {vehicle.odometer_km != null ? `${vehicle.odometer_km.toLocaleString()} km` : "—"}
                     </p>
                   </div>
                   <div className="p-4 rounded-lg bg-muted/30">
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
-                      Distance
+                      Age
                     </p>
                     <p className="text-xl font-semibold text-foreground">
-                      {vehicleData.distance} km
+                      {age != null ? `${age} yr` : "—"}
                     </p>
                     <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                      <span>Mileage</span>
-                      <span>Lifetime</span>
+                      <span>Year {vehicle.year ?? "—"}</span>
                     </div>
                   </div>
                   <div className="p-4 rounded-lg bg-muted/30">
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
-                      Total Fuel
+                      Last Service
                     </p>
                     <p className="text-xl font-semibold text-foreground">
-                      {vehicleData.totalFuel.toFixed(2)}
+                      {fmtDate(vehicle.last_service_date)}
                     </p>
+                    <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                      <span>
+                        {vehicle.last_service_odometer_km != null
+                          ? `${vehicle.last_service_odometer_km.toLocaleString()} km`
+                          : "—"}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -175,62 +202,55 @@ export default function VehicleDetail() {
                   
                   <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Internal ID</span>
-                      <span className="text-foreground font-mono text-xs">{vehicleData.internalId}</span>
+                      <span className="text-muted-foreground">Vehicle ID</span>
+                      <span className="text-foreground font-mono text-xs">{vehicle.vehicle_id}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Organization</span>
-                      <span className="text-foreground">{vehicleData.organization}</span>
+                      <span className="text-muted-foreground">License plate</span>
+                      <span className="text-foreground">{vehicle.plate || "—"}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Vehicle available</span>
-                      <span className="text-foreground">{vehicleData.isAvailable ? "Yes" : "No"}</span>
+                      <span className="text-muted-foreground">Type</span>
+                      <span className="text-foreground">{formatType(vehicle.type)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Current driver</span>
-                      <Link to="/drivers" className="text-primary hover:underline">
-                        {vehicleData.currentDriver}
-                      </Link>
+                      <span className="text-muted-foreground">Status</span>
+                      <VehicleStatusBadge status={vehicle.status || ""} />
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Current mileage</span>
-                      <div className="text-right">
-                        <span className="text-warning">No mileage entries</span>
-                        <br />
-                        <Link to="#" className="text-primary hover:underline text-xs">
-                          Add mileage
+                      <span className="text-muted-foreground">Assigned driver</span>
+                      {vehicle.assigned_driver_id ? (
+                        <Link to="/drivers" className="text-primary hover:underline">
+                          {vehicle.assigned_driver_id}
                         </Link>
-                      </div>
+                      ) : (
+                        <span className="text-muted-foreground">Unassigned</span>
+                      )}
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Age</span>
-                      <div className="text-right">
-                        <span className="text-warning">Unknown registration date</span>
-                        <br />
-                        <Link to="#" className="text-primary hover:underline text-xs">
-                          Edit reference data
-                        </Link>
-                      </div>
+                      <span className="text-muted-foreground">Odometer</span>
+                      <span className="text-foreground">
+                        {vehicle.odometer_km != null ? `${vehicle.odometer_km.toLocaleString()} km` : "—"}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Financing</span>
-                      <div className="text-right">
-                        <span className="text-warning">No active financing contract</span>
-                        <br />
-                        <Link to="#" className="text-primary hover:underline text-xs">
-                          Edit contracts
-                        </Link>
-                      </div>
+                      <span className="text-muted-foreground">Model year</span>
+                      <span className="text-foreground">{vehicle.year ?? "—"}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Active in fleet since</span>
-                      <span className="text-foreground">{vehicleData.activeInFleetSince}</span>
+                      <span className="text-muted-foreground">Acquisition date</span>
+                      <span className="text-foreground">{fmtDate(vehicle.acquisition_date)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Monitoring settings</span>
-                      <span className="text-success flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-success" />
-                        Fully enabled
+                      <span className="text-muted-foreground">Last service date</span>
+                      <span className="text-foreground">{fmtDate(vehicle.last_service_date)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Last service odometer</span>
+                      <span className="text-foreground">
+                        {vehicle.last_service_odometer_km != null
+                          ? `${vehicle.last_service_odometer_km.toLocaleString()} km`
+                          : "—"}
                       </span>
                     </div>
                   </div>
