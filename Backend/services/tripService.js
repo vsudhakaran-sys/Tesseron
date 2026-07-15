@@ -14,4 +14,29 @@ async function getTripsByVehicle(vehicleId, limit = 50) {
     return rows;
 }
 
-module.exports = { getTripsByVehicle };
+// Driver history for a vehicle, derived from trip records.
+// Returns one row per driver who has driven this vehicle, with trip counts,
+// total distance, and the date range they were active on it. The currently
+// assigned driver (vehicles.assigned_driver_id) is flagged with is_active.
+async function getDriverHistoryByVehicle(vehicleId) {
+    const [rows] = await pool.query(
+        `SELECT t.driver_id,
+                d.name        AS driver_name,
+                d.status      AS driver_status,
+                COUNT(*)              AS trip_count,
+                SUM(t.distance_km)    AS total_distance_km,
+                MIN(t.trip_date)      AS first_trip_date,
+                MAX(t.trip_date)      AS last_trip_date,
+                (v.assigned_driver_id = t.driver_id) AS is_active
+         FROM trips t
+         JOIN vehicles v      ON v.vehicle_id = t.vehicle_id
+         LEFT JOIN drivers d  ON d.driver_id = t.driver_id
+         WHERE t.vehicle_id = ? AND t.driver_id IS NOT NULL
+         GROUP BY t.driver_id, d.name, d.status, v.assigned_driver_id
+         ORDER BY is_active DESC, last_trip_date DESC`,
+        [vehicleId]
+    );
+    return rows;
+}
+
+module.exports = { getTripsByVehicle, getDriverHistoryByVehicle };
