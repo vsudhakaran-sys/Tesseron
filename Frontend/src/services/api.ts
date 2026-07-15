@@ -6,6 +6,23 @@
 const API_BASE = import.meta.env.VITE_API_URL || "";
 
 /**
+ * Throws an Error carrying the backend's `{ error }` message when a response
+ * fails, falling back to the status text. Keeps 4xx business-rule messages
+ * (e.g. F2 assignment 409s) readable in the UI.
+ */
+async function throwOnError(response: Response): Promise<void> {
+  if (response.ok) return;
+  let message = `${response.status} ${response.statusText}`;
+  try {
+    const data = await response.clone().json();
+    if (data?.error) message = data.error;
+  } catch {
+    // non-JSON body — keep the status fallback
+  }
+  throw new Error(message);
+}
+
+/**
  * Makes a GET request to the API
  * @param endpoint - The endpoint path (e.g., "/fleetsync/data/123")
  * @param options - Optional fetch options to merge with defaults
@@ -24,9 +41,7 @@ export async function apiGet<T = unknown>(
     ...options,
   });
 
-  if (!response.ok) {
-    throw new Error(`API Error: ${response.status} ${response.statusText}`);
-  }
+  await throwOnError(response);
 
   return response.json();
 }
@@ -53,9 +68,7 @@ export async function apiPost<T = unknown>(
     ...options,
   });
 
-  if (!response.ok) {
-    throw new Error(`API Error: ${response.status} ${response.statusText}`);
-  }
+  await throwOnError(response);
 
   return response.json();
 }
@@ -82,9 +95,7 @@ export async function apiPut<T = unknown>(
     ...options,
   });
 
-  if (!response.ok) {
-    throw new Error(`API Error: ${response.status} ${response.statusText}`);
-  }
+  await throwOnError(response);
 
   return response.json();
 }
@@ -108,9 +119,7 @@ export async function apiDelete<T = unknown>(
     ...options,
   });
 
-  if (!response.ok) {
-    throw new Error(`API Error: ${response.status} ${response.statusText}`);
-  }
+  await throwOnError(response);
 
   return response.json();
 }

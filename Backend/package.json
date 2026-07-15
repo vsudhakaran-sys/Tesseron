@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "db:seed": "node seeders/userSeeder.js"
+    "db:seed": "node seeders/userSeeder.js",
+    "db:seed:csv": "node seeders/csvSeeder.js"
   },
   "type": "commonjs",
   "dependencies": {

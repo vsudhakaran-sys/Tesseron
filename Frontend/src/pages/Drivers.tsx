@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
+import { apiGet } from "@/services/api";
 import { PageHeader } from "@/components/feature-specific/fleet/PageHeader";
 import { StatusBadge } from "@/components/feature-specific/fleet/StatusBadge";
 import { FilterChip } from "@/components/feature-specific/fleet/FilterChip";
@@ -20,7 +22,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/common/ui/dropdown-menu";
-import { Plus, Search, MoreHorizontal, Download, Mail, Phone } from "lucide-react";
+import { Plus, Search, MoreHorizontal, Download } from "lucide-react";
 
 // Mock data for drivers
 export const driversData: any[] = [
@@ -375,20 +377,64 @@ export function deleteDriver(id: string | number): void {
   if (idx >= 0) driversData.splice(idx, 1);
 }
 
+interface Driver {
+  driver_id: string;
+  name: string;
+  license_class: string | null;
+  hire_date: string | null;
+  status: string;
+  assigned_vehicle_id: string | null;
+  vehicle_plate: string | null;
+  vehicle_make: string | null;
+  vehicle_model: string | null;
+}
+
+// StatusBadge only supports a known set; fall back to inactive styling otherwise.
+type BadgeStatus = "active" | "inactive" | "maintenance" | "available" | "assigned";
+const BADGE_STATUSES: BadgeStatus[] = [
+  "active",
+  "inactive",
+  "maintenance",
+  "available",
+  "assigned",
+];
+const toBadgeStatus = (status: string): BadgeStatus =>
+  (BADGE_STATUSES as string[]).includes(status)
+    ? (status as BadgeStatus)
+    : "inactive";
+
 export default function Drivers() {
   const navigate = useNavigate();
-  const [drivers] = useState<any[]>(() => [...driversData]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const {
+    data: drivers = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery<Driver[]>({
+    queryKey: ["drivers"],
+    queryFn: () => apiGet<Driver[]>("/fleetsync/drivers"),
+  });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
 
   const filteredDrivers = drivers.filter((driver) => {
+    const q = searchQuery.toLowerCase();
     const matchesSearch =
-      driver.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      driver.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      driver.department.toLowerCase().includes(searchQuery.toLowerCase());
+      driver.name.toLowerCase().includes(q) ||
+      driver.driver_id.toLowerCase().includes(q);
     const matchesStatus = !statusFilter || driver.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const startIndex = (currentPage - 1) * 8;
+  const paginatedDrivers = filteredDrivers.slice(startIndex, startIndex + 8);
+  const totalPages = Math.ceil(filteredDrivers.length / 8);
 
   const getInitials = (name: string) => {
     return name
@@ -398,6 +444,18 @@ export default function Drivers() {
       .toUpperCase();
   };
 
+  const formatDate = (value: string | null) => {
+    if (!value) return "—";
+    const d = new Date(value);
+    return isNaN(d.getTime())
+      ? value
+      : d.toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+  };
+
   return (
     <div className="space-y-6 animate-fade-in relative">
       <PageHeader
@@ -405,10 +463,6 @@ export default function Drivers() {
         description="Manage fleet drivers and assignments"
         actions={
           <div className="flex items-center gap-3">
-            <Button variant="outline">
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
             <Button onClick={() => navigate("/drivers/new")}>
               <Plus className="h-4 w-4 mr-2" />
               Add Driver
@@ -425,22 +479,16 @@ export default function Drivers() {
           onClick={() => setStatusFilter(null)}
         />
         <FilterChip
-          label="Assigned"
-          isActive={statusFilter === "assigned"}
-          onClick={() => setStatusFilter("assigned")}
+          label="Active"
+          isActive={statusFilter === "active"}
+          onClick={() => setStatusFilter("active")}
         />
         <FilterChip
-          label="Available"
-          isActive={statusFilter === "available"}
-          onClick={() => setStatusFilter("available")}
-        />
-        <FilterChip
-          label="Inactive"
-          isActive={statusFilter === "inactive"}
-          onClick={() => setStatusFilter("inactive")}
+          label="On Leave"
+          isActive={statusFilter === "on_leave"}
+          onClick={() => setStatusFilter("on_leave")}
         />
         <span className="w-px h-5 bg-border mx-1" />
-        <FilterChip label="Department" hasDropdown />
         <FilterChip label="License" hasDropdown />
       </div>
 
@@ -469,86 +517,144 @@ export default function Drivers() {
                 <input type="checkbox" className="rounded border-border" />
               </TableHead>
               <TableHead className="font-semibold">Driver</TableHead>
-              <TableHead className="font-semibold">Contact</TableHead>
-              <TableHead className="font-semibold">Department</TableHead>
-              <TableHead className="font-semibold">License</TableHead>
-              <TableHead className="font-semibold">License Expiry</TableHead>
+              <TableHead className="font-semibold">License Class</TableHead>
+              <TableHead className="font-semibold">Hire Date</TableHead>
               <TableHead className="font-semibold">Assigned Vehicle</TableHead>
               <TableHead className="font-semibold">Status</TableHead>
               <TableHead className="w-12"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredDrivers.map((driver) => (
-              <TableRow
-                key={driver.id}
-                className="data-table-row cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors"
-                onClick={() => navigate(`/drivers/${driver.id}/edit`)}
-                onDoubleClick={() => navigate(`/drivers/${driver.id}/edit`)}
-              >
-                <TableCell onClick={(e) => e.stopPropagation()}>
-                  <input type="checkbox" className="rounded border-border" />
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                        {getInitials(driver.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="font-medium text-foreground">{driver.name}</span>
-                  </div>
-                </TableCell>
-                <TableCell onClick={(e) => e.stopPropagation()}>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Mail className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-foreground">{driver.email}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Phone className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-muted-foreground">{driver.phone}</span>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell className="text-foreground">{driver.department}</TableCell>
-                <TableCell className="text-foreground">{driver.license}</TableCell>
-                <TableCell className="text-foreground">{driver.licenseExpiry}</TableCell>
-                <TableCell onClick={(e) => e.stopPropagation()}>
-                  {driver.assignedVehicle ? (
-                    <Link
-                      to="/vehicles"
-                      className="text-primary hover:underline font-mono text-sm"
-                    >
-                      {driver.assignedVehicle}
-                    </Link>
-                  ) : (
-                    <span className="text-muted-foreground">—</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <StatusBadge status={driver.status} />
-                </TableCell>
-                <TableCell onClick={(e) => e.stopPropagation()}>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => navigate(`/drivers/${driver.id}/edit`)}>View Details</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate(`/drivers/${driver.id}/edit`)}>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>Assign Vehicle</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive" onClick={() => navigate(`/drivers/${driver.id}/edit`)}>Delete</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
+                  Loading drivers…
                 </TableCell>
               </TableRow>
-            ))}
+            ) : isError ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-10 text-destructive">
+                  Failed to load drivers: {(error as Error)?.message ?? "Unknown error"}
+                </TableCell>
+              </TableRow>
+            ) : filteredDrivers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
+                  No drivers found.
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedDrivers.map((driver) => (
+                <TableRow
+                  key={driver.driver_id}
+                  className="data-table-row cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors"
+                  onClick={() => navigate(`/drivers/${driver.driver_id}`)}
+                  onDoubleClick={() => navigate(`/drivers/${driver.driver_id}`)}
+                >
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <input type="checkbox" className="rounded border-border" />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                          {getInitials(driver.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-foreground">{driver.name}</span>
+                        <span className="text-xs text-muted-foreground font-mono">
+                          {driver.driver_id}
+                        </span>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-foreground">
+                    {driver.license_class || "—"}
+                  </TableCell>
+                  <TableCell className="text-foreground">
+                    {formatDate(driver.hire_date)}
+                  </TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    {driver.assigned_vehicle_id ? (
+                      <Link
+                        to={`/vehicles/${driver.assigned_vehicle_id}`}
+                        className="text-primary hover:underline text-sm"
+                      >
+                        {[driver.vehicle_make, driver.vehicle_model]
+                          .filter(Boolean)
+                          .join(" ") ||
+                          driver.vehicle_plate ||
+                          driver.assigned_vehicle_id}
+                        {driver.vehicle_plate && (
+                          <span className="block text-xs text-muted-foreground font-mono">
+                            {driver.vehicle_plate}
+                          </span>
+                        )}
+                      </Link>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge status={toBadgeStatus(driver.status)} />
+                  </TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => navigate(`/drivers/${driver.driver_id}`)}>View Details</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate(`/drivers/${driver.driver_id}/edit`)}>Edit</DropdownMenuItem>
+                        <DropdownMenuItem>Assign Vehicle</DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive" onClick={() => navigate(`/drivers/${driver.driver_id}/edit`)}>Delete</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between py-2 text-xs text-muted-foreground">
+          <p>
+            Showing <span className="font-semibold text-foreground">{startIndex + 1}</span> to{" "}
+            <span className="font-semibold text-foreground">
+              {Math.min(startIndex + 8, filteredDrivers.length)}
+            </span>{" "}
+            of <span className="font-semibold text-foreground">{filteredDrivers.length}</span> drivers
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-[11px] font-semibold"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </Button>
+            <span className="flex items-center px-2 font-medium">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-[11px] font-semibold"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
 
     </div>
   );

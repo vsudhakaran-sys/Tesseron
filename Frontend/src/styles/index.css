@@ -14,17 +14,29 @@
   :root {
     /* ── 1. Color Palette (Raw Scales) ── */
 
-    /* Curated Blue Palette (Base Accents) */
-    --color-blue-50: oklch(96.6% 0.016 262.774);   /* #eef4ff */
-    --color-blue-100: oklch(92.4% 0.036 265.153);  /* #dae6ff */
-    --color-blue-200: oklch(86.9% 0.064 261.601);  /* #bdd5ff */
-    --color-blue-300: oklch(78.7% 0.108 259.346);  /* #90bbff */
-    --color-blue-400: oklch(68.1% 0.163 260.875);  /* #5c96fc */
-    --color-blue-500: oklch(58.6% 0.211 263.618);  /* #3670f7 */
-    --color-blue-600: oklch(51.1% 0.239 264.995);  /* #2050ec */
-    --color-blue-700: oklch(45.9% 0.237 265.522);  /* #183dd9 */
-    --color-blue-800: oklch(40.1% 0.198 266.799);  /* #1a33b0 */
-    --color-blue-900: oklch(35.7% 0.151 267.534);  /* #1b308a */
+    /* TESSERON Brand Cyan (Primary Accents) — matched to logo */
+    --color-blue-50: oklch(97.2% 0.014 224.492);   /* #ECF8FD */
+    --color-blue-100: oklch(93.2% 0.034 225.450);  /* #D2EEFA */
+    --color-blue-200: oklch(87.4% 0.063 224.926);  /* #A9DFF5 */
+    --color-blue-300: oklch(80.0% 0.097 226.180);  /* #74CBEE */
+    --color-blue-400: oklch(72.5% 0.125 229.893);  /* #3DB4E5 */
+    --color-blue-500: oklch(68.3% 0.135 232.742);  /* #1DA6DE */
+    --color-blue-600: oklch(60.6% 0.128 236.341);  /* #0E8CC4 */
+    --color-blue-700: oklch(51.4% 0.104 233.506);  /* #0B7099 */
+    --color-blue-800: oklch(44.8% 0.087 233.090);  /* #0E5C7D */
+    --color-blue-900: oklch(40.0% 0.073 231.751);  /* #114E68 */
+
+    /* TESSERON Brand Gold (Accent / Highlight) — matched to logo */
+    --color-gold-50: oklch(97.3% 0.019 90.540);    /* #FBF6E8 */
+    --color-gold-100: oklch(93.7% 0.054 93.293);   /* #F6EAC2 */
+    --color-gold-200: oklch(87.4% 0.099 91.894);   /* #EDD488 */
+    --color-gold-300: oklch(81.6% 0.136 90.808);   /* #E4BF4E */
+    --color-gold-400: oklch(76.9% 0.147 87.770);   /* #DBAD28 */
+    --color-gold-500: oklch(73.5% 0.146 84.267);   /* #D4A017 */
+    --color-gold-600: oklch(64.4% 0.129 83.286);   /* #B3850F */
+    --color-gold-700: oklch(54.7% 0.109 83.378);   /* #8F6A0D */
+    --color-gold-800: oklch(45.6% 0.087 83.694);   /* #6E520F */
+    --color-gold-900: oklch(40.0% 0.073 84.487);   /* #5A4410 */
 
     /* Warm-Shifted Slate (Neutrals) */
     --color-slate-25: oklch(99.1% 0.001 287.332);  /* #fcfcfd */
@@ -108,8 +120,13 @@
     --muted: var(--color-slate-100);
     --muted-foreground: var(--color-slate-500);
 
-    --accent: var(--color-blue-100);
-    --accent-foreground: var(--color-blue-800);
+    --accent: var(--color-gold-100);
+    --accent-foreground: var(--color-gold-800);
+
+    /* Brand tokens */
+    --brand-cyan: var(--color-blue-500);
+    --brand-gold: var(--color-gold-500);
+    --brand-gold-foreground: var(--color-slate-900);
 
     --destructive: oklch(57.7% 0.205 27.36); /* Curated premium red */
     --destructive-foreground: #ffffff;
@@ -150,7 +167,7 @@
     --popover: hsl(236 50% 6%);
     --popover-foreground: hsl(236 20% 98%);
 
-    --primary: hsl(236 83% 51%);
+    --primary: var(--color-blue-500);
     --primary-foreground: hsl(0 0% 100%);
 
     --secondary: hsl(236 30% 12%);
@@ -159,12 +176,16 @@
     --muted: hsl(236 30% 10%);
     --muted-foreground: hsl(236 20% 65%);
 
-    --accent: hsl(236 50% 15%);
-    --accent-foreground: hsl(236 20% 98%);
+    --accent: var(--color-gold-900);
+    --accent-foreground: var(--color-gold-100);
+
+    --brand-cyan: var(--color-blue-400);
+    --brand-gold: var(--color-gold-400);
+    --brand-gold-foreground: var(--color-slate-950);
 
     --border: hsl(236 30% 15%);
     --input: hsl(236 30% 15%);
-    --ring: hsl(236 83% 51%);
+    --ring: var(--color-blue-500);
 
     --success: hsl(142 60% 40%);
     --success-foreground: hsl(0 0% 100%);
@@ -176,12 +197,12 @@
     /* Sidebar - Premium Deep Blue */
     --sidebar-background: hsl(236 60% 12%);
     --sidebar-foreground: hsl(236 20% 90%);
-    --sidebar-primary: hsl(236 83% 51%);
+    --sidebar-primary: var(--color-blue-500);
     --sidebar-primary-foreground: hsl(0 0% 100%);
     --sidebar-accent: hsl(236 50% 20%);
     --sidebar-accent-foreground: hsl(0 0% 100%);
     --sidebar-border: hsl(236 50% 20%);
-    --sidebar-ring: hsl(236 83% 51%);
+    --sidebar-ring: var(--color-blue-500);
     --sidebar-muted: hsl(236 30% 10%);
   }
 }
@@ -451,4 +472,4 @@
 }
 .aria-btn-secondary {
   @apply transition-all duration-300 hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-[0.98];
-}
+}

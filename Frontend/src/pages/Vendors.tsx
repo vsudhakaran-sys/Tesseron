@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/feature-specific/fleet/PageHeader";
 import { StatusBadge } from "@/components/feature-specific/fleet/StatusBadge";
 import { FilterChip } from "@/components/feature-specific/fleet/FilterChip";
@@ -99,6 +99,11 @@ const vendorsData = [
 export default function Vendors() {
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, typeFilter]);
 
   const filteredVendors = vendorsData.filter((vendor) => {
     const matchesSearch =
@@ -109,6 +114,10 @@ export default function Vendors() {
     return matchesSearch && matchesType;
   });
 
+  const startIndex = (currentPage - 1) * 8;
+  const paginatedVendors = filteredVendors.slice(startIndex, startIndex + 8);
+  const totalPages = Math.ceil(filteredVendors.length / 8);
+
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
@@ -116,10 +125,6 @@ export default function Vendors() {
         description="Manage fleet service providers and contracts"
         actions={
           <div className="flex items-center gap-3">
-            <Button variant="outline">
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
               Add Vendor
@@ -191,7 +196,7 @@ export default function Vendors() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredVendors.map((vendor) => (
+            {paginatedVendors.map((vendor) => (
               <TableRow key={vendor.id} className="data-table-row">
                 <TableCell>
                   <input type="checkbox" className="rounded border-border" />
@@ -257,6 +262,41 @@ export default function Vendors() {
           </TableBody>
         </Table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between py-2 text-xs text-muted-foreground">
+          <p>
+            Showing <span className="font-semibold text-foreground">{startIndex + 1}</span> to{" "}
+            <span className="font-semibold text-foreground">
+              {Math.min(startIndex + 8, filteredVendors.length)}
+            </span>{" "}
+            of <span className="font-semibold text-foreground">{filteredVendors.length}</span> vendors
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-[11px] font-semibold"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </Button>
+            <span className="flex items-center px-2 font-medium">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-[11px] font-semibold"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

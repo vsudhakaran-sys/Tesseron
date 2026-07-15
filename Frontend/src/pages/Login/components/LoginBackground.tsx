@@ -11,7 +11,7 @@ const LoginBackground: React.FC = () => {
     <div className="fixed inset-0 overflow-hidden pointer-events-none bg-gradient-to-b from-slate-50 via-white to-slate-100">
       {/* Faint cool tint layers in opposite corners for quiet depth */}
       <div className="absolute -top-1/4 -right-1/4 w-[55vw] h-[55vw] rounded-full bg-blue-200/30 blur-[120px]" />
-      <div className="absolute -bottom-1/4 -left-1/4 w-[55vw] h-[55vw] rounded-full bg-indigo-200/25 blur-[130px]" />
+      <div className="absolute -bottom-1/4 -left-1/4 w-[55vw] h-[55vw] rounded-full bg-gold-200/20 blur-[130px]" />
 
       {/* Soft halo behind the card so it lifts off the surface */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[85vw] max-w-[1300px] h-[75vh] bg-white/50 rounded-[80px] blur-[100px]" />
