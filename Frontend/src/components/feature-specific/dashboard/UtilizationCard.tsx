@@ -24,9 +24,6 @@ export function UtilizationCard({ data, locale }: { data: UtilizationData; local
           <Gauge className="h-4 w-4 text-primary" />
           Fleet Utilization
         </h3>
-        <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">
-          Rule F4 Enforced
-        </span>
       </div>
 
       <div className="flex items-center gap-6">

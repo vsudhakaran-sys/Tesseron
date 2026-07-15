@@ -17,8 +17,6 @@ import DriverPortal from "./pages/DriverPortal";
 import NotFound from "./pages/NotFound";
 
 import Login from "./pages/Login";
-import MfaSetup from "./pages/Login/MfaSetup";
-import MfaVerify from "./pages/Login/MfaVerify";
 import Settings from "./pages/Settings";
 
 import { LanguageProvider } from "@/hooks/useLanguage";
@@ -34,8 +32,6 @@ const App = () => (
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/mfa-setup" element={<MfaSetup />} />
-            <Route path="/mfa-verify" element={<MfaVerify />} />
             <Route element={<AppLayout />}>
               <Route path="/" element={<Dashboard />} />
               <Route path="/vehicles" element={<Vehicles />} />

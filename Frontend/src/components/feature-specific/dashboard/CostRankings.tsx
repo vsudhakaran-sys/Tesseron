@@ -37,9 +37,6 @@ export function CostRankings({ data, locale }: { data: CostVehicle[]; locale: st
           <Coins className="h-4 w-4 text-emerald-600" />
           Top 5 Highest-Cost Vehicles
         </h3>
-        <span className="text-[10px] text-muted-foreground font-medium">
-          Rule F4 Ranking
-        </span>
       </div>
 
       <div className="space-y-4">

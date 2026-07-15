@@ -1,4 +1,4 @@
-﻿import { LogOut, Settings, User, Menu, X, Home } from "lucide-react";
+import { LogOut, Settings, User, Menu, X, Home } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useNotifications, markAllRead } from "@/hooks/useNotifications";
@@ -83,21 +83,6 @@ export function AppHeader({ isCollapsed, setIsCollapsed }: AppHeaderProps) {
         {/* Right Side: Actions */}
         <div className="flex items-center justify-end gap-2 sm:gap-4 shrink-0">
           <div className="flex items-center gap-1.5 sm:gap-3">
-            {/* Branding - Powered by */}
-            <a 
-              href="https://www.thoughtlinedigital.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mr-2 hidden sm:block transition-all duration-300 hover:opacity-80"
-            >
-              <img 
-                src="/Powered.png" 
-                alt="Powered by" 
-                className="h-8 w-auto object-contain"
-                onError={(e) => { e.currentTarget.style.display = 'none'; }}
-              />
-            </a>
-
             {/* Notifications */}
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
@@ -139,29 +124,6 @@ export function AppHeader({ isCollapsed, setIsCollapsed }: AppHeaderProps) {
                     </div>
                   )}
                 </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Language Switcher */}
-            <DropdownMenu modal={false}>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full overflow-hidden">
-                  {currentLanguage && (
-                    <ReactCountryFlag countryCode={currentLanguage.countryCode} svg style={{ width: "1.2em", height: "1.2em", borderRadius: "50%" }} />
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-[140px]">
-                {languages.map((lang) => (
-                  <DropdownMenuItem
-                    key={lang.code}
-                    onClick={() => setLocale(lang.code)}
-                    className="gap-2 cursor-pointer text-xs"
-                  >
-                    <ReactCountryFlag countryCode={lang.countryCode} svg style={{ width: "1.2em", height: "1.2em" }} className="flex-shrink-0" />
-                    <span>{lang.label}</span>
-                  </DropdownMenuItem>
-                ))}
               </DropdownMenuContent>
             </DropdownMenu>
 

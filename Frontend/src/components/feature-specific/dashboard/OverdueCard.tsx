@@ -11,9 +11,6 @@ export function OverdueCard({ count }: { count: number }) {
           <Wrench className="h-4 w-4 text-warning" />
           Maintenance Compliance
         </h3>
-        <span className="text-[10px] bg-warning/10 text-warning px-2 py-0.5 rounded-full font-bold">
-          Rule F3 Enforced
-        </span>
       </div>
 
       <div className="flex items-start gap-4">
@@ -30,7 +27,7 @@ export function OverdueCard({ count }: { count: number }) {
           </div>
 
           <p className="text-[11px] text-muted-foreground leading-relaxed">
-            Rule F3 states a vehicle is overdue if never serviced, or if <span className="font-semibold text-foreground">&gt; 10,000 km</span> or <span className="font-semibold text-foreground">&gt; 180 days</span> have elapsed since the last service.
+            A vehicle is overdue if never serviced, or if <span className="font-semibold text-foreground">&gt; 10,000 km</span> or <span className="font-semibold text-foreground">&gt; 180 days</span> have elapsed since the last service.
           </p>
 
           <div className="grid grid-cols-2 gap-2 text-[10px] pt-1 text-muted-foreground">

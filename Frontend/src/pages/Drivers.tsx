@@ -23,6 +23,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/common/ui/dropdown-menu";
 import { Plus, Search, MoreHorizontal, Download } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/common/ui/sheet";
+import { DriverForm } from "@/components/feature-specific/fleet/DriverForm";
+import { apiPost } from "@/services/api";
+import { toast } from "sonner";
 
 // Mock data for drivers
 export const driversData: any[] = [
@@ -408,12 +412,14 @@ export default function Drivers() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
   const {
     data: drivers = [],
     isLoading,
     isError,
     error,
+    refetch,
   } = useQuery<Driver[]>({
     queryKey: ["drivers"],
     queryFn: () => apiGet<Driver[]>("/fleetsync/drivers"),
@@ -463,7 +469,7 @@ export default function Drivers() {
         description="Manage fleet drivers and assignments"
         actions={
           <div className="flex items-center gap-3">
-            <Button onClick={() => navigate("/drivers/new")}>
+            <Button onClick={() => setIsAddOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Add Driver
             </Button>
@@ -655,7 +661,34 @@ export default function Drivers() {
           </div>
         </div>
       )}
-
+      <Sheet open={isAddOpen} onOpenChange={setIsAddOpen}>
+        <SheetContent className="sm:max-w-2xl overflow-y-auto z-[100]">
+          <SheetHeader className="mb-6">
+            <SheetTitle>Add Driver</SheetTitle>
+          </SheetHeader>
+          <DriverForm
+            driver={null}
+            onCancel={() => setIsAddOpen(false)}
+            onSaved={(newDriver) => {
+              apiPost<any>("/fleetsync/drivers", {
+                driver_id: newDriver.driver_id,
+                name: newDriver.name,
+                license_class: newDriver.license_class || null,
+                status: newDriver.status || "active",
+                hire_date: newDriver.hire_date || null,
+              })
+              .then((res) => {
+                setIsAddOpen(false);
+                refetch();
+                toast.success("Driver added successfully");
+                // Optional: navigate to edit details if extra fields are needed
+                navigate(`/drivers/${res.driver_id}/edit`);
+              })
+              .catch((err) => toast.error(`Creation failed: ${err.message}`));
+            }}
+          />
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

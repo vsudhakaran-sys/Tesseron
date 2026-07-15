@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/hooks/useLanguage";
 import LoginBackground from "./components/LoginBackground";
@@ -40,8 +40,8 @@ export default function Login() {
       if (response.ok) {
         localStorage.setItem("TESSERON_token", data.token);
         localStorage.setItem("TESSERON_user", JSON.stringify(data.user));
-        // Continue to two-factor authentication before granting portal access
-        navigate("/mfa-setup");
+        // Navigate directly to the dashboard
+        navigate("/");
       } else {
         alert(data.message || t.login.invalidCredentials);
       }
