@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { apiGet, apiPut } from "@/services/api";
 import { VehicleStatusBadge, formatType } from "./Vehicles";
-import { VehicleData } from "@/components/feature-specific/fleet/VehicleData";
 import { VehicleTechnicalData } from "@/components/feature-specific/fleet/VehicleTechnicalData";
 import { Button } from "@/components/common/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/common/ui/tabs";
@@ -48,6 +47,18 @@ interface Trip {
   purpose: string | null;
 }
 
+// Driver-history row from GET /api/vehicles/:id/driver-history
+interface DriverHistoryRow {
+  driver_id: string;
+  driver_name: string | null;
+  driver_status: string | null;
+  trip_count: number;
+  total_distance_km: string | null;
+  first_trip_date: string | null;
+  last_trip_date: string | null;
+  is_active: number; // 1 = currently assigned driver
+}
+
 function fmtDate(d: string | null): string {
   if (!d) return "—";
   const date = new Date(d);
@@ -59,6 +70,8 @@ export default function VehicleDetail() {
   const [vehicle, setVehicle] = useState<VehicleRow | null>(null);
   const [trips, setTrips] = useState<Trip[]>([]);
   const [tripsLoading, setTripsLoading] = useState(true);
+  const [driverHistory, setDriverHistory] = useState<DriverHistoryRow[]>([]);
+  const [driverHistoryLoading, setDriverHistoryLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -73,6 +86,11 @@ export default function VehicleDetail() {
       .then(setTrips)
       .catch(() => setTrips([]))
       .finally(() => setTripsLoading(false));
+
+    apiGet<DriverHistoryRow[]>(`/vehicles/${id}/driver-history`)
+      .then(setDriverHistory)
+      .catch(() => setDriverHistory([]))
+      .finally(() => setDriverHistoryLoading(false));
   }, [id]);
 
   if (loading) {
@@ -120,8 +138,7 @@ export default function VehicleDetail() {
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="bg-muted/50 w-full justify-start">
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="vehicle-data">Vehicle Data</TabsTrigger>
-          <TabsTrigger value="technical">Technical Data</TabsTrigger>
+          {/* <TabsTrigger value="technical">Technical Data</TabsTrigger> */}
           <TabsTrigger value="drivers">Drivers</TabsTrigger>
         </TabsList>
 
@@ -318,18 +335,6 @@ export default function VehicleDetail() {
           </div>
         </TabsContent>
 
-        <TabsContent value="vehicle-data" className="mt-6">
-          <VehicleData 
-            vehicle={vehicle} 
-            onUpdate={(fieldKey, val) => {
-              apiPut<VehicleRow>(`/vehicles/${id}`, { [fieldKey]: val })
-                .then(setVehicle)
-                .then(() => toast.success("Field updated successfully"))
-                .catch((err) => toast.error(`Update failed: ${err.message}`));
-            }} 
-          />
-        </TabsContent>
-
         <TabsContent value="technical" className="mt-6">
           <VehicleTechnicalData 
             vehicle={vehicle} 
@@ -343,12 +348,109 @@ export default function VehicleDetail() {
         </TabsContent>
 
         <TabsContent value="drivers" className="mt-6">
-          <div className="bg-card rounded-lg border border-border p-8 text-center">
-            <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="font-semibold text-foreground mb-2 text-xs">Driver History</h3>
-            <p className="text-muted-foreground text-xs">
-              View and manage driver assignments for this vehicle.
-            </p>
+          <div className="space-y-6">
+            {/* Active driver */}
+            <div className="bg-card rounded-lg border border-border p-5 shadow-sm">
+              <h3 className="font-semibold text-foreground mb-4 text-xs">Active Driver</h3>
+              {vehicle.assigned_driver_id ? (
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                    <User className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <Link
+                      to={`/drivers/${vehicle.assigned_driver_id}`}
+                      className="text-sm font-medium text-primary hover:underline"
+                    >
+                      {vehicle.assigned_driver_name || vehicle.assigned_driver_id}
+                    </Link>
+                    <p className="text-[10px] text-muted-foreground font-mono">
+                      {vehicle.assigned_driver_id}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                  <User className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">No driver currently assigned</span>
+                </div>
+              )}
+            </div>
+
+            {/* Driver history */}
+            <div className="bg-card rounded-lg border border-border p-5 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-foreground text-xs">Driver History</h3>
+                <span className="text-[10px] text-muted-foreground">
+                  {driverHistory.length} driver{driverHistory.length === 1 ? "" : "s"}
+                </span>
+              </div>
+
+              {driverHistoryLoading ? (
+                <p className="text-xs text-muted-foreground">Loading driver history…</p>
+              ) : driverHistory.length === 0 ? (
+                <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                  <User className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">
+                    No drivers have been recorded for this vehicle
+                  </span>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b border-border text-[10px] uppercase tracking-wider text-muted-foreground">
+                        <th className="text-left font-medium py-2 pr-4">Driver</th>
+                        <th className="text-left font-medium py-2 pr-4">Status</th>
+                        <th className="text-right font-medium py-2 pr-4">Trips</th>
+                        <th className="text-right font-medium py-2 pr-4">Distance</th>
+                        <th className="text-left font-medium py-2 pr-4">First trip</th>
+                        <th className="text-left font-medium py-2">Last trip</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {driverHistory.map((row) => (
+                        <tr
+                          key={row.driver_id}
+                          className="border-b border-border/40 hover:bg-muted/20"
+                        >
+                          <td className="py-2 pr-4">
+                            <div className="flex items-center gap-2">
+                              <Link
+                                to={`/drivers/${row.driver_id}`}
+                                className="text-primary hover:underline"
+                              >
+                                {row.driver_name || row.driver_id}
+                              </Link>
+                              {row.is_active ? (
+                                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-medium uppercase tracking-wider text-primary">
+                                  Active
+                                </span>
+                              ) : null}
+                            </div>
+                          </td>
+                          <td className="py-2 pr-4 text-muted-foreground">
+                            {row.driver_status || "—"}
+                          </td>
+                          <td className="py-2 pr-4 text-right text-foreground">
+                            {row.trip_count}
+                          </td>
+                          <td className="py-2 pr-4 text-right text-foreground">
+                            {Number(row.total_distance_km ?? 0).toLocaleString()} km
+                          </td>
+                          <td className="py-2 pr-4 text-muted-foreground">
+                            {fmtDate(row.first_trip_date)}
+                          </td>
+                          <td className="py-2 text-muted-foreground">
+                            {fmtDate(row.last_trip_date)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
         </TabsContent>
       </Tabs>

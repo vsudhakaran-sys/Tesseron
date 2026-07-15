@@ -7,7 +7,7 @@ const {
     updateVehicle,
     deleteVehicle,
 } = require('../services/vehicleService');
-const { getTripsByVehicle } = require('../services/tripService');
+const { getTripsByVehicle, getDriverHistoryByVehicle } = require('../services/tripService');
 const { assignDriver, unassignDriver } = require('../services/driverService');
 
 // GET /api/vehicles — list all
@@ -37,6 +37,16 @@ router.get('/:id/trips', async (req, res) => {
         const limit = Math.min(parseInt(req.query.limit) || 50, 500);
         const trips = await getTripsByVehicle(req.params.id, limit);
         res.json(trips);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/vehicles/:id/driver-history — drivers who have driven this vehicle
+router.get('/:id/driver-history', async (req, res) => {
+    try {
+        const history = await getDriverHistoryByVehicle(req.params.id);
+        res.json(history);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
