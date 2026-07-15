@@ -348,7 +348,15 @@ async function getHistory() {
 }
 
 async function getDrivers() {
-    const [rows] = await pool.query('SELECT * FROM drivers ORDER BY driver_id ASC');
+    const [rows] = await pool.query(`
+        SELECT d.*,
+               v.plate AS vehicle_plate,
+               v.make  AS vehicle_make,
+               v.model AS vehicle_model
+        FROM drivers d
+        LEFT JOIN vehicles v ON v.vehicle_id = d.assigned_vehicle_id
+        ORDER BY d.driver_id ASC
+    `);
     return rows;
 }
 

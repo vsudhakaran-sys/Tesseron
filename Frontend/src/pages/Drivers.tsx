@@ -384,6 +384,9 @@ interface Driver {
   hire_date: string | null;
   status: string;
   assigned_vehicle_id: string | null;
+  vehicle_plate: string | null;
+  vehicle_make: string | null;
+  vehicle_model: string | null;
 }
 
 // StatusBadge only supports a known set; fall back to inactive styling otherwise.
@@ -571,9 +574,18 @@ export default function Drivers() {
                     {driver.assigned_vehicle_id ? (
                       <Link
                         to="/vehicles"
-                        className="text-primary hover:underline font-mono text-sm"
+                        className="text-primary hover:underline text-sm"
                       >
-                        {driver.assigned_vehicle_id}
+                        {[driver.vehicle_make, driver.vehicle_model]
+                          .filter(Boolean)
+                          .join(" ") ||
+                          driver.vehicle_plate ||
+                          driver.assigned_vehicle_id}
+                        {driver.vehicle_plate && (
+                          <span className="block text-xs text-muted-foreground font-mono">
+                            {driver.vehicle_plate}
+                          </span>
+                        )}
                       </Link>
                     ) : (
                       <span className="text-muted-foreground">—</span>
