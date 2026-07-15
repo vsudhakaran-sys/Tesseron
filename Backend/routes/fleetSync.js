@@ -19,6 +19,7 @@ const {
     getDrivers,
     getDriverById,
     getTripsByDriver,
+    getMaintenance,
     getRecordsByUpload,
     exportUploadAsExcel,
 } = require('../services/dataService');
@@ -550,6 +551,17 @@ router.get('/drivers/:driverId/trips', async (req, res) => {
     try {
         const trips = await getTripsByDriver(req.params.driverId);
         res.json(trips);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ─── GET /maintenance ─────────────────────────────────────────────────────────
+
+router.get('/maintenance', async (_req, res) => {
+    try {
+        const records = await getMaintenance();
+        res.json(records);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
