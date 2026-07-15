@@ -239,7 +239,7 @@ export default function Dashboard() {
   const fuelLiters = parseFloat(t?.total_fuel_liters || "0");
   const avgPrice = parseFloat(t?.avg_price_per_liter || "0");
   const avgDist = parseFloat(t?.avg_distance_between_fills || "0");
-  const hasTelemetryData = t && parseInt(t.total_transactions || "0") > 0;
+  const hasTelemetryData = t && Number(t.total_transactions || 0) > 0;
 
   return (
     <div className="space-y-5">
@@ -545,72 +545,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ── Recent Transactions ── */}
-      <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm animate-fade-up" style={{ animationDelay: '640ms', opacity: 0, animationFillMode: 'forwards' }}>
-        <div className="flex items-center justify-between p-4 border-b border-border bg-slate-50/50">
-          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <Clock className="h-4 w-4 text-primary" />
-            {trans.dashboard.recentTransactions}
-          </h3>
-        </div>
-        {stats.recentTransactions.length === 0 ? (
-          <div className="p-6 text-center text-sm text-muted-foreground">{trans.dashboard.noTransactions}</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="border-b border-border bg-slate-50/30">
-                  <th className="text-left p-3 font-semibold text-muted-foreground">{trans.dashboard.vehicle}</th>
-                  <th className="text-left p-3 font-semibold text-muted-foreground">{trans.dashboard.station}</th>
-                  <th className="text-left p-3 font-semibold text-muted-foreground hidden sm:table-cell">{trans.dashboard.type}</th>
-                  <th className="text-right p-3 font-semibold text-muted-foreground">{trans.dashboard.qty}</th>
-                  <th className="text-right p-3 font-semibold text-muted-foreground">{trans.dashboard.amount}</th>
-                  <th className="text-right p-3 font-semibold text-muted-foreground hidden md:table-cell">{trans.dashboard.date}</th>
-                  <th className="text-right p-3 font-semibold text-muted-foreground hidden lg:table-cell">{trans.dashboard.odometer}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {stats.recentTransactions.map((txn, i) => (
-                  <tr key={i} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="p-3 font-mono font-semibold text-slate-900">{txn.vehicle_number ?? "—"}</td>
-                    <td className="p-3">
-                      <p className="font-medium text-slate-800 truncate max-w-[140px]">{txn.station_name}</p>
-                      <p className="text-xs text-muted-foreground truncate max-w-[140px]">{txn.service_station_location}</p>
-                    </td>
-                    <td className="p-3 hidden sm:table-cell">
-                      <span
-                        className={cn(
-                          "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold",
-                          txn.energy_type === "Fuel"
-                            ? "bg-amber-100 text-amber-700"
-                            : txn.energy_type === "Electric"
-                              ? "bg-emerald-100 text-emerald-700"
-                              : "bg-blue-100 text-blue-700"
-                        )}
-                      >
-                        {energyIcon[txn.energy_type] || <Activity className="h-4 w-4" />}
-                        {txn.product_type || txn.energy_type || "Standard"}
-                      </span>
-                    </td>
-                    <td className="p-3 text-right text-slate-600">
-                      {isNaN(parseFloat(txn.quantity)) ? "0" : fmt(parseFloat(txn.quantity), locale)} {txn.unit || ""}
-                    </td>
-                    <td className="p-3 text-right font-semibold text-slate-900">
-                      {isNaN(parseFloat(txn.net_base_value)) ? "—" : fmtCurrency(parseFloat(txn.net_base_value), locale, txn.payment_currency || "EUR")}
-                    </td>
-                    <td className="p-3 text-right text-slate-500 hidden md:table-cell">
-                      {fmtDate(txn.transaction_date || new Date().toISOString(), locale)}
-                    </td>
-                    <td className="p-3 text-right text-slate-500 hidden lg:table-cell">
-                      {txn.odometer ? `${txn.odometer.toLocaleString(locale === "en" ? "en-GB" : "nl-NL")} km` : "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
     </div>
   );
 }

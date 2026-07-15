@@ -53,7 +53,7 @@ const num = (v: string | number | null | undefined) => {
 const prettyType = (t: string | null) =>
   t ? t.replace(/_/g, " ") : "—";
 
-const getMaintenanceStatus = (r: MaintenanceRecord) => {
+export const getMaintenanceStatus = (r: MaintenanceRecord) => {
   if (!r.vehicle_last_service_date || r.vehicle_last_service_odometer === null || r.vehicle_last_service_odometer === undefined) {
     return "OVERDUE";
   }
