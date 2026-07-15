@@ -543,8 +543,8 @@ export default function Drivers() {
                 <TableRow
                   key={driver.driver_id}
                   className="data-table-row cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors"
-                  onClick={() => navigate(`/drivers/${driver.driver_id}/edit`)}
-                  onDoubleClick={() => navigate(`/drivers/${driver.driver_id}/edit`)}
+                  onClick={() => navigate(`/drivers/${driver.driver_id}`)}
+                  onDoubleClick={() => navigate(`/drivers/${driver.driver_id}`)}
                 >
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <input type="checkbox" className="rounded border-border" />
@@ -602,7 +602,7 @@ export default function Drivers() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => navigate(`/drivers/${driver.driver_id}/edit`)}>View Details</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate(`/drivers/${driver.driver_id}`)}>View Details</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => navigate(`/drivers/${driver.driver_id}/edit`)}>Edit</DropdownMenuItem>
                         <DropdownMenuItem>Assign Vehicle</DropdownMenuItem>
                         <DropdownMenuItem className="text-destructive" onClick={() => navigate(`/drivers/${driver.driver_id}/edit`)}>Delete</DropdownMenuItem>

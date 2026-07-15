@@ -360,6 +360,32 @@ async function getDrivers() {
     return rows;
 }
 
+async function getDriverById(driverId) {
+    const [rows] = await pool.query(
+        `SELECT d.*,
+                v.plate AS vehicle_plate,
+                v.make  AS vehicle_make,
+                v.model AS vehicle_model,
+                v.year  AS vehicle_year,
+                v.type  AS vehicle_type,
+                v.status AS vehicle_status,
+                v.odometer_km AS vehicle_odometer_km
+         FROM drivers d
+         LEFT JOIN vehicles v ON v.vehicle_id = d.assigned_vehicle_id
+         WHERE d.driver_id = ?`,
+        [driverId]
+    );
+    return rows[0] || null;
+}
+
+async function getTripsByDriver(driverId) {
+    const [rows] = await pool.query(
+        `SELECT * FROM trips WHERE driver_id = ? ORDER BY trip_date DESC`,
+        [driverId]
+    );
+    return rows;
+}
+
 async function getRecordsByUpload(uploadId) {
     const [rows] = await pool.query(
         'SELECT * FROM fleetsync WHERE upload_id = ? ORDER BY id ASC',
@@ -395,6 +421,8 @@ module.exports = {
     updateUploadHistory,
     getHistory,
     getDrivers,
+    getDriverById,
+    getTripsByDriver,
     getRecordsByUpload,
     deleteRecordsByUpload,
     exportUploadAsExcel,

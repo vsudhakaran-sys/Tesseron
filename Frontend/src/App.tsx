@@ -11,6 +11,7 @@ import VehicleNew from "./pages/VehicleNew";
 import VehicleEdit from "./pages/VehicleEdit";
 import Drivers from "./pages/Drivers";
 import DriverNew from "./pages/DriverNew";
+import DriverDetail from "./pages/DriverDetail";
 import DriverEdit from "./pages/DriverEdit";
 import Vendors from "./pages/Vendors";
 import DriverPortal from "./pages/DriverPortal";
@@ -51,6 +52,7 @@ const App = () => (
               <Route path="/vehicles/:id/edit" element={<VehicleEdit />} />
               <Route path="/drivers" element={<Drivers />} />
               <Route path="/drivers/new" element={<DriverNew />} />
+              <Route path="/drivers/:id" element={<DriverDetail />} />
               <Route path="/drivers/:id/edit" element={<DriverEdit />} />
               <Route path="/vendors" element={<Vendors />} />
               {/* Placeholder routes */}
