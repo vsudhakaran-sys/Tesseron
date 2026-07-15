@@ -12,52 +12,55 @@ import {
 } from "./SpecSheet";
 
 /* ────────────────────────────────────────────────────────────────────────────
- * Read-only "Technical Data" view for a vehicle.
- * Mirrors the field groups of the Vehicle Edit form's "Technical" tab
- * (Motor & Drivetrain / Measurements & Weights) as a searchable spec sheet.
+ * Dynamic "Technical Data" view — read & inline-edit specs sheet.
  * ──────────────────────────────────────────────────────────────────────────── */
 
-// ── Motor & Drivetrain (single column) ──
-const motorSpecs: Spec[] = [
-  { label: "Rated Power (kW / hp)", value: "135 kW / 184 hp" },
-  { label: "Torque", value: "300 Nm" },
-  { label: "Number of Gears", value: "8" },
-  { label: "Cylinders", value: "4" },
-  { label: "Cyl. Arrangement", value: "Inline" },
-  { label: "Top Speed", value: "235 km/h" },
-  { label: "Acceleration", value: "7.1 s (0–100 km/h)" },
-  { label: "Displacement", value: "1998 cc" },
-];
+interface VehicleTechnicalDataProps {
+  vehicle: any;
+  onUpdate?: (fieldKey: string, newValue: any) => void;
+}
 
-// ── Measurements & Weights (two columns — left / right, matching the layout) ──
-const measurementLeft: Spec[] = [
-  { label: "Empty Weight", value: "1,500 kg" },
-  { label: "Payload", value: "550 kg" },
-  { label: "Boot Volume (Max)", value: "1,510 L" },
-  { label: "No of Driven Axles", value: "1" },
-  { label: "Length", value: "4,709 mm" },
-  { label: "Height", value: "1,435 mm" },
-  { label: "Tire Size (Axle 2)", value: "255/40 R18" },
-  { label: "Towing Capacity – Braked", value: "1,600 kg" },
-];
-
-const measurementRight: Spec[] = [
-  { label: "Max Weight", value: "2,050 kg" },
-  { label: "Boot Volume (Normal)", value: "480 L" },
-  { label: "Number of Axles", value: "2" },
-  { label: "Wheelbase", value: "2,851 mm" },
-  { label: "Width", value: "1,827 mm" },
-  { label: "Tire Size (Axle 1)", value: "225/45 R18" },
-  { label: "Roof Load", value: "75 kg" },
-  { label: "Towing Capacity – Unbraked", value: "750 kg" },
-];
-
-export function VehicleTechnicalData() {
+export function VehicleTechnicalData({ vehicle, onUpdate }: VehicleTechnicalDataProps) {
   const [query, setQuery] = useState("");
 
-  const motor = useMemo(() => filterSpecs(motorSpecs, query), [query]);
-  const measLeft = useMemo(() => filterSpecs(measurementLeft, query), [query]);
-  const measRight = useMemo(() => filterSpecs(measurementRight, query), [query]);
+  // ── Motor & Drivetrain ──
+  const motorSpecs: Spec[] = useMemo(() => [
+    { label: "Rated Power (kW / hp)", value: vehicle.ratedPower || "135 kW / 184 hp", fieldKey: "ratedPower" },
+    { label: "Torque", value: vehicle.torque || "300 Nm", fieldKey: "torque" },
+    { label: "Number of Gears", value: vehicle.gearsCount || "8", fieldKey: "gearsCount" },
+    { label: "Cylinders", value: vehicle.cylindersCount || "4", fieldKey: "cylindersCount" },
+    { label: "Cyl. Arrangement", value: vehicle.cylinderArrangement || "Inline", fieldKey: "cylinderArrangement" },
+    { label: "Top Speed", value: vehicle.topSpeed || "235 km/h", fieldKey: "topSpeed" },
+    { label: "Acceleration", value: vehicle.acceleration || "7.1s", fieldKey: "acceleration" },
+    { label: "Displacement", value: vehicle.engineDisplacement || "1998 cc", fieldKey: "engineDisplacement" },
+  ], [vehicle]);
+
+  // ── Measurements & Weights ──
+  const measurementLeft: Spec[] = useMemo(() => [
+    { label: "Empty Weight", value: vehicle.emptyWeight || "1,500 kg", fieldKey: "emptyWeight" },
+    { label: "Payload", value: vehicle.payload || "550 kg", fieldKey: "payload" },
+    { label: "Boot Volume (Max)", value: vehicle.bootCapacity || "1,510 L", fieldKey: "bootCapacity" },
+    { label: "No of Driven Axles", value: vehicle.drivenAxlesCount || "1", fieldKey: "drivenAxlesCount" },
+    { label: "Length", value: vehicle.length || "4,709 mm", fieldKey: "length" },
+    { label: "Height", value: vehicle.height || "1,435 mm", fieldKey: "height" },
+    { label: "Tire Size (Axle 2)", value: vehicle.tireSizeAxle2 || "255/40 R18", fieldKey: "tireSizeAxle2" },
+    { label: "Towing Capacity – Braked", value: vehicle.brakedTrailerLoad || "1,600 kg", fieldKey: "brakedTrailerLoad" },
+  ], [vehicle]);
+
+  const measurementRight: Spec[] = useMemo(() => [
+    { label: "Max Weight", value: vehicle.maxWeightAllowed || "2,050 kg", fieldKey: "maxWeightAllowed" },
+    { label: "Boot Volume (Normal)", value: vehicle.bootCapacity || "480 L", fieldKey: "bootCapacity" },
+    { label: "Number of Axles", value: vehicle.axesCount || "2", fieldKey: "axesCount" },
+    { label: "Wheelbase", value: vehicle.wheelbase || "2,851 mm", fieldKey: "wheelbase" },
+    { label: "Width", value: vehicle.width || "1,827 mm", fieldKey: "width" },
+    { label: "Tire Size (Axle 1)", value: vehicle.tireSizeAxle1 || "225/45 R18", fieldKey: "tireSizeAxle1" },
+    { label: "Roof Load", value: vehicle.roofLoad || "75 kg", fieldKey: "roofLoad" },
+    { label: "Towing Capacity – Unbraked", value: vehicle.unbrakedTrailerLoad || "750 kg", fieldKey: "unbrakedTrailerLoad" },
+  ], [vehicle]);
+
+  const motor = useMemo(() => filterSpecs(motorSpecs, query), [motorSpecs, query]);
+  const measLeft = useMemo(() => filterSpecs(measurementLeft, query), [measurementLeft, query]);
+  const measRight = useMemo(() => filterSpecs(measurementRight, query), [measurementRight, query]);
 
   const showMotor = motor.length > 0;
   const showMeasurements = measLeft.length > 0 || measRight.length > 0;
@@ -74,7 +77,7 @@ export function VehicleTechnicalData() {
           {showMotor && (
             <div className="lg:col-span-5">
               <SpecCard icon={Cog} title="Motor & Drivetrain">
-                <SpecColumn items={motor} />
+                <SpecColumn items={motor} onSave={onUpdate} />
               </SpecCard>
             </div>
           )}
@@ -82,7 +85,7 @@ export function VehicleTechnicalData() {
           {showMeasurements && (
             <div className={cn(showMotor ? "lg:col-span-7" : "lg:col-span-12")}>
               <SpecCard icon={Ruler} title="Measurements & Weights">
-                <SpecTwoColumn left={measLeft} right={measRight} />
+                <SpecTwoColumn left={measLeft} right={measRight} onSave={onUpdate} />
               </SpecCard>
             </div>
           )}

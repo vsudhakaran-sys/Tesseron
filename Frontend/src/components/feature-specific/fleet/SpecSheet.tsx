@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/common/ui/input";
 import { cn } from "@/utils/utils";
@@ -12,42 +12,141 @@ import { cn } from "@/utils/utils";
 export interface Spec {
   label: string;
   value?: string;
+  fieldKey?: string;
+  onSave?: (fieldKey: string, newValue: any) => void;
 }
 
-/** A single label / value row. */
-export function SpecRow({ label, value }: Spec) {
+/** A single label / value row. Clickable to edit. */
+export function SpecRow({ label, value, fieldKey, onSave }: Spec) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [tempValue, setTempValue] = useState(value || "");
+  const inputRef = useRef<HTMLInputElement | HTMLSelectElement>(null);
+
+  useEffect(() => {
+    setTempValue(value || "");
+  }, [value]);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isEditing]);
+
+  const handleSave = () => {
+    setIsEditing(false);
+    if (onSave && fieldKey && tempValue !== value) {
+      let cleanValue: any = tempValue;
+      if (fieldKey === "mileage") {
+        cleanValue = parseInt(tempValue.replace(/[^\d]/g, ""), 10) || 0;
+      } else if (fieldKey === "tax" || fieldKey === "privateUseRate") {
+        cleanValue = tempValue.replace(/[€\s]/g, "");
+      }
+      onSave(fieldKey, cleanValue);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSave();
+    } else if (e.key === "Escape") {
+      setTempValue(value || "");
+      setIsEditing(false);
+    }
+  };
+
+  const isEditable = !!(fieldKey && onSave);
+
   return (
-    <div className="flex items-baseline justify-between gap-4 py-2.5 border-b border-border/40">
-      <span className="text-[13px] text-muted-foreground">{label}</span>
-      <span
-        className={cn(
-          "text-[13px] text-right",
-          value ? "font-semibold text-foreground" : "text-muted-foreground/50"
-        )}
-      >
-        {value || "—"}
-      </span>
+    <div 
+      className={cn(
+        "flex items-baseline justify-between gap-4 py-1.5 border-b border-border/40 transition-colors",
+        isEditable && !isEditing && "hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer rounded px-1.5 -mx-1.5"
+      )}
+      onClick={() => isEditable && !isEditing && setIsEditing(true)}
+    >
+      <span className="text-[11px] text-muted-foreground select-none">{label}</span>
+      {isEditing ? (
+        <div onClick={(e) => e.stopPropagation()} className="flex items-center">
+          {label === "Status" ? (
+            <select
+              ref={inputRef as any}
+              value={tempValue}
+              onChange={(e) => setTempValue(e.target.value)}
+              onBlur={handleSave}
+              onKeyDown={handleKeyDown}
+              className="text-[11px] h-6 bg-white dark:bg-slate-900 border border-border rounded px-1 text-foreground"
+            >
+              <option value="Active">Active</option>
+              <option value="Maintenance">Maintenance</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          ) : label === "Tire Type" ? (
+            <select
+              ref={inputRef as any}
+              value={tempValue}
+              onChange={(e) => setTempValue(e.target.value)}
+              onBlur={handleSave}
+              onKeyDown={handleKeyDown}
+              className="text-[11px] h-6 bg-white dark:bg-slate-900 border border-border rounded px-1 text-foreground"
+            >
+              <option value="Summer">Summer</option>
+              <option value="Winter">Winter</option>
+              <option value="All-Season">All-Season</option>
+            </select>
+          ) : label.toLowerCase().includes("date") ? (
+            <input
+              ref={inputRef as any}
+              type="date"
+              value={tempValue}
+              onChange={(e) => setTempValue(e.target.value)}
+              onBlur={handleSave}
+              onKeyDown={handleKeyDown}
+              className="text-[11px] h-6 bg-white dark:bg-slate-900 border border-border rounded px-1 text-foreground"
+            />
+          ) : (
+            <input
+              ref={inputRef as any}
+              type="text"
+              value={tempValue}
+              onChange={(e) => setTempValue(e.target.value)}
+              onBlur={handleSave}
+              onKeyDown={handleKeyDown}
+              className="text-[11px] h-6 bg-white dark:bg-slate-900 border border-border rounded px-1 text-right text-foreground w-36"
+            />
+          )}
+        </div>
+      ) : (
+        <span
+          className={cn(
+            "text-[11px] text-right transition-colors",
+            value ? "font-semibold text-foreground" : "text-muted-foreground/50",
+            isEditable && "hover:text-primary"
+          )}
+        >
+          {value || "—"}
+        </span>
+      )}
     </div>
   );
 }
 
 /** A vertical stack of spec rows. */
-export function SpecColumn({ items }: { items: Spec[] }) {
+export function SpecColumn({ items, onSave }: { items: Spec[]; onSave?: (fieldKey: string, val: any) => void }) {
   return (
     <div>
       {items.map((s) => (
-        <SpecRow key={s.label} {...s} />
+        <SpecRow key={s.label} {...s} onSave={onSave} />
       ))}
     </div>
   );
 }
 
 /** Two side-by-side spec columns (stacks to one column on mobile). */
-export function SpecTwoColumn({ left, right }: { left: Spec[]; right: Spec[] }) {
+export function SpecTwoColumn({ left, right, onSave }: { left: Spec[]; right: Spec[]; onSave?: (fieldKey: string, val: any) => void }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8">
-      <SpecColumn items={left} />
-      <SpecColumn items={right} />
+      <SpecColumn items={left} onSave={onSave} />
+      <SpecColumn items={right} onSave={onSave} />
     </div>
   );
 }

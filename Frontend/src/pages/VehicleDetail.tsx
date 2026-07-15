@@ -3,8 +3,6 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import { PageHeader } from "@/components/feature-specific/fleet/PageHeader";
 import { StatusBadge } from "@/components/feature-specific/fleet/StatusBadge";
 import { StatsCard } from "@/components/feature-specific/fleet/StatsCard";
-import { VehicleContracts } from "@/components/feature-specific/fleet/VehicleContracts";
-import { VehicleDocuments } from "@/components/feature-specific/fleet/VehicleDocuments";
 import { VehicleData } from "@/components/feature-specific/fleet/VehicleData";
 import { VehicleTechnicalData } from "@/components/feature-specific/fleet/VehicleTechnicalData";
 import { Button } from "@/components/common/ui/button";
@@ -22,8 +20,6 @@ import {
   Gauge,
   FileText,
   AlertTriangle,
-  Receipt,
-  ClipboardList,
 } from "lucide-react";
 
 // Mock vehicle data
@@ -155,12 +151,6 @@ export default function VehicleDetail() {
           <TabsTrigger value="vehicle-data">Vehicle Data</TabsTrigger>
           <TabsTrigger value="technical">Technical Data</TabsTrigger>
           <TabsTrigger value="drivers">Drivers</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-          <TabsTrigger value="contracts">Contracts</TabsTrigger>
-
-          <TabsTrigger value="damages">Damages</TabsTrigger>
-          <TabsTrigger value="invoices">Invoices</TabsTrigger>
-          <TabsTrigger value="tasks">Tasks</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-6">
@@ -183,7 +173,7 @@ export default function VehicleDetail() {
                       Cost
                     </p>
                     <p className="text-xl font-semibold text-primary">
-                      EUR {vehicleData.cost.toFixed(2)}
+                      EUR {vehicle.cost.toFixed(2)}
                     </p>
                   </div>
                   <div className="p-4 rounded-lg bg-muted/30">
@@ -191,7 +181,7 @@ export default function VehicleDetail() {
                       Distance
                     </p>
                     <p className="text-xl font-semibold text-foreground">
-                      {vehicleData.distance} km
+                      {vehicle.distance} km
                     </p>
                     <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                       <span>Mileage</span>
@@ -203,7 +193,7 @@ export default function VehicleDetail() {
                       Total Fuel
                     </p>
                     <p className="text-xl font-semibold text-foreground">
-                      {vehicleData.totalFuel.toFixed(2)}
+                      {vehicle.totalFuel.toFixed(2)}
                     </p>
                   </div>
                 </div>
@@ -221,20 +211,20 @@ export default function VehicleDetail() {
                   <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Internal ID</span>
-                      <span className="text-foreground font-mono text-xs">{vehicleData.internalId}</span>
+                      <span className="text-foreground font-mono text-xs">{vehicle.internalId}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Organization</span>
-                      <span className="text-foreground">{vehicleData.organization}</span>
+                      <span className="text-foreground">{vehicle.organization}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Vehicle available</span>
-                      <span className="text-foreground">{vehicleData.isAvailable ? "Yes" : "No"}</span>
+                      <span className="text-foreground">{vehicle.isAvailable ? "Yes" : "No"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Current driver</span>
                       <Link to="/drivers" className="text-primary hover:underline">
-                        {vehicleData.currentDriver}
+                        {vehicle.currentDriver}
                       </Link>
                     </div>
                     <div className="flex justify-between">
@@ -269,7 +259,7 @@ export default function VehicleDetail() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Active in fleet since</span>
-                      <span className="text-foreground">{vehicleData.activeInFleetSince}</span>
+                      <span className="text-foreground">{vehicle.activeInFleetSince}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Monitoring settings</span>
@@ -347,11 +337,25 @@ export default function VehicleDetail() {
         </TabsContent>
 
         <TabsContent value="vehicle-data" className="mt-6">
-          <VehicleData />
+          <VehicleData 
+            vehicle={vehicle} 
+            onUpdate={(fieldKey, val) => {
+              const updated = { ...vehicle, [fieldKey]: val };
+              updateVehicle(updated);
+              setVehicle(updated);
+            }} 
+          />
         </TabsContent>
 
         <TabsContent value="technical" className="mt-6">
-          <VehicleTechnicalData />
+          <VehicleTechnicalData 
+            vehicle={vehicle} 
+            onUpdate={(fieldKey, val) => {
+              const updated = { ...vehicle, [fieldKey]: val };
+              updateVehicle(updated);
+              setVehicle(updated);
+            }} 
+          />
         </TabsContent>
 
         <TabsContent value="drivers" className="mt-6">
@@ -364,45 +368,7 @@ export default function VehicleDetail() {
           </div>
         </TabsContent>
 
-        <TabsContent value="documents" className="mt-6">
-          <VehicleDocuments />
-        </TabsContent>
 
-        <TabsContent value="contracts" className="mt-6">
-          <VehicleContracts />
-        </TabsContent>
-
-
-
-        <TabsContent value="damages" className="mt-6">
-          <div className="bg-card rounded-lg border border-border p-8 text-center">
-            <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="font-semibold text-foreground mb-2">Damages</h3>
-            <p className="text-muted-foreground">
-              Record and track vehicle damage incidents.
-            </p>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="invoices" className="mt-6">
-          <div className="bg-card rounded-lg border border-border p-8 text-center">
-            <Receipt className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="font-semibold text-foreground mb-2">Invoices</h3>
-            <p className="text-muted-foreground">
-              View all invoices related to this vehicle.
-            </p>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="tasks" className="mt-6">
-          <div className="bg-card rounded-lg border border-border p-8 text-center">
-            <ClipboardList className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="font-semibold text-foreground mb-2">Tasks</h3>
-            <p className="text-muted-foreground">
-              Manage pending and completed tasks for this vehicle.
-            </p>
-          </div>
-        </TabsContent>
       </Tabs>
     </div>
   );

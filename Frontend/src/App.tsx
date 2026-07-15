@@ -7,8 +7,6 @@ import { AppLayout } from "@/components/common/layout/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import Vehicles from "./pages/Vehicles";
 import VehicleDetail from "./pages/VehicleDetail";
-import VehicleNew from "./pages/VehicleNew";
-import VehicleEdit from "./pages/VehicleEdit";
 import Drivers from "./pages/Drivers";
 import DriverNew from "./pages/DriverNew";
 import DriverEdit from "./pages/DriverEdit";
@@ -42,9 +40,7 @@ const App = () => (
             <Route element={<AppLayout />}>
               <Route path="/" element={<Dashboard />} />
               <Route path="/vehicles" element={<Vehicles />} />
-              <Route path="/vehicles/new" element={<VehicleNew />} />
               <Route path="/vehicles/:id" element={<VehicleDetail />} />
-              <Route path="/vehicles/:id/edit" element={<VehicleEdit />} />
               <Route path="/drivers" element={<Drivers />} />
               <Route path="/drivers/new" element={<DriverNew />} />
               <Route path="/drivers/:id/edit" element={<DriverEdit />} />
