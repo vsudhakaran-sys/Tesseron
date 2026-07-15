@@ -57,7 +57,7 @@ export function AppSidebar({ isCollapsed, setIsCollapsed }: AppSidebarProps) {
       icon: <User className="h-4 w-4" />,
     },
     {
-      label: t.nav.maintenance || "Maintenance",
+      label: "Maintenance",
       href: "/maintenance",
       icon: <Wrench className="h-4 w-4" />,
     },

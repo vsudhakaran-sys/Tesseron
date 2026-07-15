@@ -155,6 +155,7 @@ export default function Vehicles() {
   const [statusFilter, setStatusFilter] = useState<string | null>("active");
   const [assignTarget, setAssignTarget] = useState<any | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const fetchVehicles = () => {
     setLoading(true);
@@ -167,6 +168,10 @@ export default function Vehicles() {
   useEffect(() => {
     fetchVehicles();
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
 
   // Reflect a new assignment in the table without a full refetch.
   const handleAssigned = (vehicleId: string, driverId: string) => {
@@ -200,6 +205,10 @@ export default function Vehicles() {
     const matchesStatus = !statusFilter || vehicle.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const startIndex = (currentPage - 1) * 8;
+  const paginatedVehicles = filteredVehicles.slice(startIndex, startIndex + 8);
+  const totalPages = Math.ceil(filteredVehicles.length / 8);
 
   return (
     <div className="space-y-6 animate-fade-in relative">
@@ -282,7 +291,7 @@ export default function Vehicles() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredVehicles.map((vehicle) => (
+            {paginatedVehicles.map((vehicle) => (
               <TableRow
                 key={vehicle.id}
                 className="data-table-row cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors"
@@ -348,6 +357,41 @@ export default function Vehicles() {
           </TableBody>
         </Table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between py-2 text-xs text-muted-foreground">
+          <p>
+            Showing <span className="font-semibold text-foreground">{startIndex + 1}</span> to{" "}
+            <span className="font-semibold text-foreground">
+              {Math.min(startIndex + 8, filteredVehicles.length)}
+            </span>{" "}
+            of <span className="font-semibold text-foreground">{filteredVehicles.length}</span> vehicles
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-[11px] font-semibold"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </Button>
+            <span className="flex items-center px-2 font-medium">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-[11px] font-semibold"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
 
       <Sheet open={isAddOpen} onOpenChange={setIsAddOpen}>
         <SheetContent className="sm:max-w-2xl overflow-y-auto z-[100]">

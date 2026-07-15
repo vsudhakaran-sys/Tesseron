@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { apiGet } from "@/services/api";
 import { PageHeader } from "@/components/feature-specific/fleet/PageHeader";
 import { FilterChip } from "@/components/feature-specific/fleet/FilterChip";
 import { Input } from "@/components/common/ui/input";
+import { Button } from "@/components/common/ui/button";
 import {
   Table,
   TableBody,
@@ -52,6 +53,7 @@ const prettyType = (t: string | null) =>
 export default function Maintenance() {
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const {
     data: records = [],
@@ -62,6 +64,10 @@ export default function Maintenance() {
     queryKey: ["maintenance"],
     queryFn: () => apiGet<MaintenanceRecord[]>("/fleetsync/maintenance"),
   });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, typeFilter]);
 
   // Distinct service types for filter chips.
   const serviceTypes = Array.from(
@@ -85,6 +91,10 @@ export default function Maintenance() {
 
   const totalCost = filtered.reduce((sum, r) => sum + num(r.cost), 0);
 
+  const startIndex = (currentPage - 1) * 8;
+  const paginatedRecords = filtered.slice(startIndex, startIndex + 8);
+  const totalPages = Math.ceil(filtered.length / 8);
+
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
@@ -104,26 +114,25 @@ export default function Maintenance() {
             key={type}
             label={prettyType(type)}
             isActive={typeFilter === type}
-            onClick={() => setTypeFilter(type)}
+            onClick={() => setTypeFilter(typeFilter === type ? null : type)}
           />
         ))}
       </div>
 
-      {/* Search and count */}
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          <span className="font-semibold text-foreground">{filtered.length}</span>{" "}
-          records
-          <span className="mx-2">•</span>
-          Total cost{" "}
-          <span className="font-semibold text-foreground">
-            EUR {totalCost.toFixed(2)}
-          </span>
-        </p>
-        <div className="relative w-56">
+      {/* Stats & Search */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex gap-6 text-sm text-muted-foreground">
+          <p>
+            Total Records: <span className="font-semibold text-foreground">{filtered.length}</span>
+          </p>
+          <p>
+            Total Cost: <span className="font-semibold text-foreground">EUR {totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          </p>
+        </div>
+        <div className="relative w-full md:w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search..."
+            placeholder="Search record, vehicle..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 h-9"
@@ -136,7 +145,7 @@ export default function Maintenance() {
         <Table>
           <TableHeader>
             <TableRow className="data-table-header">
-              <TableHead className="font-semibold">Record</TableHead>
+              <TableHead className="font-semibold">Record ID</TableHead>
               <TableHead className="font-semibold">Vehicle</TableHead>
               <TableHead className="font-semibold">Service Type</TableHead>
               <TableHead className="font-semibold">Date</TableHead>
@@ -165,7 +174,7 @@ export default function Maintenance() {
                 </TableCell>
               </TableRow>
             ) : (
-              filtered.map((r) => {
+              paginatedRecords.map((r) => {
                 const vehicleName =
                   [r.vehicle_make, r.vehicle_model].filter(Boolean).join(" ") ||
                   r.vehicle_plate ||
@@ -210,6 +219,41 @@ export default function Maintenance() {
             )}
           </TableBody>
         </Table>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between py-2 px-4 text-xs text-muted-foreground">
+            <p>
+              Showing <span className="font-semibold text-foreground">{startIndex + 1}</span> to{" "}
+              <span className="font-semibold text-foreground">
+                {Math.min(startIndex + 8, filtered.length)}
+              </span>{" "}
+              of <span className="font-semibold text-foreground">{filtered.length}</span> records
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-[11px] font-semibold"
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </Button>
+              <span className="flex items-center px-2 font-medium">
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-[11px] font-semibold"
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
