@@ -71,3 +71,64 @@ CREATE TABLE IF NOT EXISTS `fleetsync` (
     KEY `idx_transaction_date` (`transaction_date`),
     KEY `idx_vehicle_number` (`vehicle_number`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `vehicles` (
+    `vehicle_id` VARCHAR(20) PRIMARY KEY,
+    `plate` VARCHAR(50),
+    `make` VARCHAR(100),
+    `model` VARCHAR(100),
+    `year` INT,
+    `type` VARCHAR(50),
+    `status` VARCHAR(50),
+    `odometer_km` BIGINT,
+    `acquisition_date` DATE,
+    `last_service_date` DATE,
+    `last_service_odometer_km` BIGINT,
+    `assigned_driver_id` VARCHAR(20),
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    KEY `idx_vehicles_status` (`status`),
+    KEY `idx_vehicles_driver` (`assigned_driver_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `drivers` (
+    `driver_id` VARCHAR(20) PRIMARY KEY,
+    `name` VARCHAR(255),
+    `license_class` VARCHAR(10),
+    `hire_date` DATE,
+    `status` VARCHAR(50),
+    `assigned_vehicle_id` VARCHAR(20),
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    KEY `idx_drivers_status` (`status`),
+    KEY `idx_drivers_vehicle` (`assigned_vehicle_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `maintenance` (
+    `record_id` VARCHAR(20) PRIMARY KEY,
+    `vehicle_id` VARCHAR(20),
+    `service_date` DATE,
+    `odometer_km` BIGINT,
+    `service_type` VARCHAR(100),
+    `cost` DECIMAL(14,2),
+    `notes` TEXT,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    KEY `idx_maintenance_vehicle` (`vehicle_id`),
+    KEY `idx_maintenance_date` (`service_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `trips` (
+    `trip_id` VARCHAR(20) PRIMARY KEY,
+    `vehicle_id` VARCHAR(20),
+    `driver_id` VARCHAR(20),
+    `trip_date` DATE,
+    `origin` VARCHAR(255),
+    `destination` VARCHAR(255),
+    `distance_km` DECIMAL(10,2),
+    `duration_hr` DECIMAL(10,2),
+    `fuel_liters` DECIMAL(10,2),
+    `fuel_cost` DECIMAL(14,2),
+    `purpose` VARCHAR(100),
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    KEY `idx_trips_vehicle` (`vehicle_id`),
+    KEY `idx_trips_driver` (`driver_id`),
+    KEY `idx_trips_date` (`trip_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
