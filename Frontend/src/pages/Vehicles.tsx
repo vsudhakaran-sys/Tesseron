@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { apiGet } from "@/services/api";
 import { PageHeader } from "@/components/feature-specific/fleet/PageHeader";
 import { VehicleIcon } from "@/components/feature-specific/fleet/VehicleIcon";
+import { AssignDriverDialog } from "@/components/feature-specific/fleet/AssignDriverDialog";
 import { FilterChip } from "@/components/feature-specific/fleet/FilterChip";
 import { Button } from "@/components/common/ui/button";
 import { Input } from "@/components/common/ui/input";
@@ -149,6 +150,7 @@ export default function Vehicles() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>("active");
+  const [assignTarget, setAssignTarget] = useState<any | null>(null);
 
   useEffect(() => {
     apiGet<VehicleRow[]>("/vehicles")
@@ -156,6 +158,19 @@ export default function Vehicles() {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
+
+  // Reflect a new assignment in the table without a full refetch.
+  const handleAssigned = (vehicleId: string, driverId: string) => {
+    setVehicles((prev) =>
+      prev.map((v) => (v.id === vehicleId ? { ...v, driver: driverId } : v))
+    );
+  };
+
+  const handleUnassigned = (vehicleId: string) => {
+    setVehicles((prev) =>
+      prev.map((v) => (v.id === vehicleId ? { ...v, driver: "" } : v))
+    );
+  };
 
   const filteredVehicles = vehicles.filter((vehicle) => {
     const matchesSearch =
@@ -303,7 +318,7 @@ export default function Vehicles() {
                         <Link to={`/vehicles/${vehicle.id}`}>View Details</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate(`/vehicles/${vehicle.id}/edit`)}>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>Assign Driver</DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => setAssignTarget(vehicle)}>Assign Driver</DropdownMenuItem>
                       <DropdownMenuItem className="text-destructive" onClick={() => navigate(`/vehicles/${vehicle.id}/edit`)}>Delete</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -314,6 +329,18 @@ export default function Vehicles() {
         </Table>
       </div>
 
+      {assignTarget && (
+        <AssignDriverDialog
+          open={!!assignTarget}
+          onOpenChange={(open) => !open && setAssignTarget(null)}
+          vehicleId={assignTarget.id}
+          vehicleName={assignTarget.displayName}
+          vehicleStatus={assignTarget.status}
+          currentDriverId={assignTarget.driver || undefined}
+          onAssigned={handleAssigned}
+          onUnassigned={handleUnassigned}
+        />
+      )}
     </div>
   );
 }
