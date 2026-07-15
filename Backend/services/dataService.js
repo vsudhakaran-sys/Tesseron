@@ -378,6 +378,19 @@ async function getDriverById(driverId) {
     return rows[0] || null;
 }
 
+async function getMaintenance() {
+    const [rows] = await pool.query(`
+        SELECT m.*,
+               v.plate AS vehicle_plate,
+               v.make  AS vehicle_make,
+               v.model AS vehicle_model
+        FROM maintenance m
+        LEFT JOIN vehicles v ON v.vehicle_id = m.vehicle_id
+        ORDER BY m.service_date DESC
+    `);
+    return rows;
+}
+
 async function getTripsByDriver(driverId) {
     const [rows] = await pool.query(
         `SELECT * FROM trips WHERE driver_id = ? ORDER BY trip_date DESC`,
@@ -423,6 +436,7 @@ module.exports = {
     getDrivers,
     getDriverById,
     getTripsByDriver,
+    getMaintenance,
     getRecordsByUpload,
     deleteRecordsByUpload,
     exportUploadAsExcel,

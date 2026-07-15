@@ -13,6 +13,7 @@ import Drivers from "./pages/Drivers";
 import DriverNew from "./pages/DriverNew";
 import DriverDetail from "./pages/DriverDetail";
 import DriverEdit from "./pages/DriverEdit";
+import Maintenance from "./pages/Maintenance";
 import Vendors from "./pages/Vendors";
 import DriverPortal from "./pages/DriverPortal";
 import NotFound from "./pages/NotFound";
@@ -54,6 +55,7 @@ const App = () => (
               <Route path="/drivers/new" element={<DriverNew />} />
               <Route path="/drivers/:id" element={<DriverDetail />} />
               <Route path="/drivers/:id/edit" element={<DriverEdit />} />
+              <Route path="/maintenance" element={<Maintenance />} />
               <Route path="/vendors" element={<Vendors />} />
               {/* Placeholder routes */}
               <Route path="/fuel-data" element={<FuelData />} />
